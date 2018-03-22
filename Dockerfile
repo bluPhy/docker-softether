@@ -1,6 +1,6 @@
 # SoftEther VPN server
 
-FROM debian:8
+FROM debian:8.10-slim
 LABEL maintainer="Alejandro Leal ajleal@protonmail.com"
 
 #ENV VERSION v4.18-9570-rtm-2015.07.26
