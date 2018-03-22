@@ -1,16 +1,15 @@
 # SoftEther VPN server
 
 FROM debian:8
-MAINTAINER Frank Rosquin <frank.rosquin@gmail.com>
+LABEL maintainer="Alejandro Leal ajleal@protonmail.com"
 
 #ENV VERSION v4.18-9570-rtm-2015.07.26
-#ENV VERSION v4.19-9599-beta-2015.10.19
-ENV VERSION v4.21-9613-beta-2016.04.24
+ENV VERSION v4.25-9656-rtm-2018.01.15
+
 WORKDIR /usr/local/vpnserver
 
-
 RUN apt-get update &&\
-        apt-get -y -q install iptables gcc make wget && \
+        apt-get -y -q install iptables gcc make wget apt-utils && \
         apt-get clean && \
         rm -rf /var/cache/apt/* /var/lib/apt/lists/* && \
         wget http://www.softether-download.com/files/softether/${VERSION}-tree/Linux/SoftEther_VPN_Server/64bit_-_Intel_x64_or_AMD64/softether-vpnserver-${VERSION}-linux-x64-64bit.tar.gz -O /tmp/softether-vpnserver.tar.gz &&\
