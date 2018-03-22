@@ -2,7 +2,7 @@
 
 This will deploy a fully functional [SoftEther VPN](https://www.softether.org) server as a docker image.
 
-Available on [Docker Hub](https://registry.hub.docker.com/u/ajleal/softether/).
+Available on [Docker Hub](https://hub.docker.com/r/ajleal/softether/).
 
 ## Download
 
