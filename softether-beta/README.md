@@ -8,7 +8,7 @@ Current build version: SoftEther VPN v4.30-9696-beta-2019.07.08
 
 ## Download
 
-    docker pull ajleal/softether
+    docker pull ajleal/softether:beta
 
 ## Run
 
