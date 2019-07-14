@@ -14,7 +14,7 @@ Current build version: SoftEther VPN v4.30-9696-beta-2019.07.08
 
 Simplest version:
 
-    docker run -d --net host --cap-add NET_ADMIN --name softether ajleal/softether
+    docker run -d --net host --cap-add NET_ADMIN --name softether ajleal/softether:beta
 
 With external config file:
 
