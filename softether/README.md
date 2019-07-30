@@ -18,6 +18,7 @@ Simplest version:
 
 With external config file:
 
+    mkdir /etc/vpnserver
     touch /etc/vpnserver/vpn_server.config
     docker run -d -v /etc/vpnserver/vpn_server.config:/usr/local/vpnserver/vpn_server.config --net host --cap-add NET_ADMIN --name softether ajleal/softether
 
