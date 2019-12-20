@@ -2,9 +2,9 @@
 
 FROM debian:10.0-slim
 LABEL maintainer="Alejandro Leal ajleal@protonmail.com"
-LABEL softetherversion="v4.30-9696-beta-2019.07.08"
+LABEL softetherversion="v4.31-9727-beta-2019.11.18"
 
-ENV VERSION v4.30-9696-beta-2019.07.08
+ENV VERSION v4.31-9727-beta-2019.11.18
 
 WORKDIR /usr/local/vpnserver
 
