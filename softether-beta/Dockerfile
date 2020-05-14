@@ -1,10 +1,10 @@
 # SoftEther VPN server
 
-FROM debian:10.2-slim
+FROM debian:stable-slim
 LABEL maintainer="Alejandro Leal ajleal@protonmail.com"
-LABEL softetherversion="v4.31-9727-beta-2019.11.18"
+LABEL softetherversion="v4.34-9745-beta-2020.04.05"
 
-ENV VERSION v4.31-9727-beta-2019.11.18
+ENV VERSION v4.34-9745-beta-2020.04.05
 
 WORKDIR /usr/local/vpnserver
 
