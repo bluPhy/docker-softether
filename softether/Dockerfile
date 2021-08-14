@@ -1,6 +1,6 @@
 # SoftEther VPN server
 
-FROM debian:stable-slim
+FROM ubuntu:latest
 LABEL maintainer="Alejandro Leal ajleal@protonmail.com"
 LABEL softetherversion="v4.34-9745-rtm-2020.04.05"
 
