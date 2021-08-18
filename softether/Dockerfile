@@ -2,9 +2,9 @@
 
 FROM ubuntu:latest
 LABEL maintainer="Alejandro Leal ajleal@protonmail.com"
-LABEL softetherversion="v4.34-9745-rtm-2020.04.05"
+LABEL softetherversion="v4.38-9760-rtm-2021.08.17"
 
-ENV VERSION v4.34-9745-rtm-2020.04.05
+ENV VERSION v4.38-9760-rtm-2021.08.17
 
 WORKDIR /usr/local/vpnserver
 
