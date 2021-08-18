@@ -6,20 +6,25 @@ LABEL softetherversion="v4.38-9760-rtm-2021.08.17"
 
 ENV VERSION v4.38-9760-rtm-2021.08.17
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 WORKDIR /usr/local/vpnserver
 
 RUN apt-get update &&\
-        apt-get -y -q install iptables gcc make wget apt-utils && \
+        apt-get -y -q install iptables gcc make wget apt-utils git build-essential libreadline-dev libssl-dev libncurses-dev zlib1g-dev && \
         apt-get -y -q upgrade && \
+        git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git ./SoftEtherVPN &&\
+        cd SoftEtherVPN &&\
+        ./configure &&\
+        make &&\
+        make install &&\
+        cd .. && \
         apt -y -q autoremove && \
         apt-get clean && \
+        apt-get purge -y -q --auto-remove gcc make wget git build-essential libreadline-dev libssl-dev libncurses-dev zlib1g-dev && \
         rm -rf /var/cache/apt/* /var/lib/apt/lists/* && \
-        wget http://www.softether-download.com/files/softether/${VERSION}-tree/Linux/SoftEther_VPN_Server/64bit_-_Intel_x64_or_AMD64/softether-vpnserver-${VERSION}-linux-x64-64bit.tar.gz -O /tmp/softether-vpnserver.tar.gz &&\
-        tar -xzvf /tmp/softether-vpnserver.tar.gz -C /usr/local/ &&\
-        rm /tmp/softether-vpnserver.tar.gz && \
-        make i_read_and_agree_the_license_agreement && \
-        apt-get purge -y -q --auto-remove gcc make wget
-
+        rm -rf SoftEtherVPN
+ 
 ADD runner.sh /usr/local/vpnserver/runner.sh
 RUN chmod 755 /usr/local/vpnserver/runner.sh
 
