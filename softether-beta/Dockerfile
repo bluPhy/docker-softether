@@ -17,7 +17,7 @@ RUN apt-get update &&\
         wget http://www.softether-download.com/files/softether/${VERSION}-tree/Linux/SoftEther_VPN_Server/64bit_-_Intel_x64_or_AMD64/softether-vpnserver-${VERSION}-linux-x64-64bit.tar.gz -O /tmp/softether-vpnserver.tar.gz &&\
         tar -xzvf /tmp/softether-vpnserver.tar.gz -C /usr/local/ && \
         rm /tmp/softether-vpnserver.tar.gz && \
-        make i_read_and_agree_the_license_agreement && \
+        make && \
         apt-get purge -y -q --auto-remove gcc make wget
 
 ADD runner.sh /usr/local/vpnserver/runner.sh
