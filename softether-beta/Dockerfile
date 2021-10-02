@@ -1,6 +1,6 @@
 # SoftEther VPN server
 
-FROM ubuntu:latest
+FROM ubuntu:20.04
 LABEL maintainer="Alejandro Leal ajleal@protonmail.com"
 LABEL softetherversion="v4.37-9758-beta-2021.08.16"
 
