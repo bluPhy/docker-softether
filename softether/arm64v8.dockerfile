@@ -1,5 +1,5 @@
 # SoftEther VPN server
-FROM arm64/v8/debian:stable-slim
+FROM arm64v8/debian:stable-slim
 LABEL maintainer="Alejandro Leal ajleal@protonmail.com"
 LABEL softetherversion="Latest_Stable"
 
