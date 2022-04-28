@@ -1,10 +1,10 @@
 # SoftEther VPN server
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 LABEL maintainer="Alejandro Leal ajleal@protonmail.com"
-LABEL softetherversion="v4.38-9760-rtm-2021.08.17"
+LABEL softetherversion="Latest_Stable"
 
-ENV VERSION v4.38-9760-rtm-2021.08.17
+ENV VERSION "Latest_Stable"
 
 ARG DEBIAN_FRONTEND=noninteractive
 

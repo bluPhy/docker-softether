@@ -4,7 +4,7 @@ This will deploy a fully functional [SoftEther VPN](https://www.softether.org) s
 
 Available on [Docker Hub](https://hub.docker.com/r/ajleal/softether/).
 
-Current build version: SoftEther VPN v4.38-9760-rtm-2021.08.17
+Current build version: SoftEther VPN Stable (https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git) 
 
 ## Download
 
