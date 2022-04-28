@@ -3,7 +3,7 @@
 This will deploy a fully functional [SoftEther VPN](https://www.softether.org) server as a docker image. Only for the latest RTM version of the product.
 
 Available on [Docker Hub](https://hub.docker.com/r/ajleal/softether/).
-Current build version: SoftEther VPN Stable (<https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git>)
+Current build version: [SoftEther VPN Stable](https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git)
 
 ![Docker Pulls](https://img.shields.io/docker/pulls/ajleal/softether)
 
