@@ -1,5 +1,5 @@
 # SoftEther VPN server
-FROM ubuntu:22.04
+FROM ubuntu:20.04
 LABEL maintainer="Alejandro Leal ajleal@protonmail.com"
 LABEL softetherversion="Latest_Stable"
 
