@@ -1,5 +1,5 @@
 # SoftEther VPN server
-FROM --platform=$BUILDPLATFORM debian:stable-slim
+FROM amd64/debian:stable-slim
 LABEL maintainer="Alejandro Leal ajleal@protonmail.com"
 LABEL softetherversion="Latest_Stable"
 
