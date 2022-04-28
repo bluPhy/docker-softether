@@ -11,7 +11,7 @@ Current build version: SoftEther VPN Stable (<https://github.com/SoftEtherVPN/So
 
 ### Github Actions Build
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/bluPhy/docker-softether/Build)
+[![Build](https://github.com/bluPhy/docker-softether/actions/workflows/image.yml/badge.svg)](https://github.com/bluPhy/docker-softether/actions/workflows/image.yml)
 
 ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/ajleal/softether/latest)
 
