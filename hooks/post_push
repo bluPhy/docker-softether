@@ -3,4 +3,4 @@
 # Use manifest-tool to create the manifest, given the experimental
 # "docker manifest" command isn't available yet on Docker Hub.
 
-docker manifest create ajleal/softether:latest ajleal/softether:amd64 ajleal/softether:arm64v8 --amend
+#docker manifest create ajleal/softether:latest ajleal/softether:amd64 ajleal/softether:arm64v8 --amend
