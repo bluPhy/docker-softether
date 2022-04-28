@@ -9,8 +9,9 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /usr/local/vpnserver
 
-RUN apt-get update &&\
-        apt-get -y -q install iptables gcc make wget apt-utils git build-essential libreadline-dev libssl-dev libncurses-dev zlib1g-dev
+RUN apt-get update
+
+RUN apt-get -y -q install iptables gcc make wget apt-utils git build-essential libreadline-dev libssl-dev libncurses-dev zlib1g-dev
 
 RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git ./SoftEtherVPN &&\
         cd SoftEtherVPN &&\
@@ -19,7 +20,7 @@ RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git ./SoftEthe
         make install &&\
         cd ..
 
-RUN     apt -y -q autoremove && \
+RUN apt -y -q autoremove && \
         apt-get clean && \
         apt-get purge -y -q --auto-remove gcc make wget git build-essential libreadline-dev libssl-dev libncurses-dev zlib1g-dev && \
         rm -rf /var/cache/apt/* /var/lib/apt/lists/* && \
