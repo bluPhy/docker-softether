@@ -17,4 +17,3 @@ ln -s /var/log/vpnserver/*_log /usr/local/vpnserver/
 exec /usr/local/vpnserver/vpnserver execsvc
 
 exit $?
-
