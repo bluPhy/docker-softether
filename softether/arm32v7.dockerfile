@@ -11,7 +11,6 @@ WORKDIR /usr/local/vpnserver
 
 RUN apt-get update &&\
         apt-get -y -q install iptables gcc make wget apt-utils git build-essential libreadline-dev libssl-dev libncurses-dev zlib1g-dev && \
-        apt-get -y -q dist-upgrade && \
         git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git ./SoftEtherVPN &&\
         cd SoftEtherVPN &&\
         ./configure &&\
