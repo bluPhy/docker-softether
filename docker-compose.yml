@@ -13,6 +13,4 @@ services:
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
       - "/etc/timezone:/etc/timezone:ro"
-      - vpn_data/vpn_server.config:/usr/vpnserver/vpn_server.config
-volumes:
-  vpn_data:
+      - "/etc/vpn_server.config:/usr/vpnserver/vpn_server.config"
