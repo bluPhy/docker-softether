@@ -21,6 +21,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     build-essential \
     libncurses6 \
+    libreadline8 \
     libncurses-dev \
     libreadline-dev \
     libssl1.1 \
@@ -45,7 +46,7 @@ COPY copyables /
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     libncurses6 \
-    libreadline7 \
+    libreadline8 \
     libssl1.1 \
     iptables \
     unzip \
