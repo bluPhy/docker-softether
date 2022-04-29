@@ -22,7 +22,6 @@ RUN apt-get update \
     build-essential \
     libncurses6 \
     libncurses-dev \
-    libreadline \
     libreadline-dev \
     libssl1.1 \
     libssl-dev \
