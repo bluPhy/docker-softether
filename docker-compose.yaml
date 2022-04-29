@@ -18,6 +18,6 @@ services:
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
       - "/etc/timezone:/etc/timezone:ro"
-      - "./softether_log:/usr/local/vpnserver/server_log"
-      - "./softether_packetlog:/usr/local/vpnserver/packet_log"
-      - "./softether_securitylog:/usr/local/vpnserver/security_log"
+      - "/usr/local/vpnserver/server_log:/var/log/vpnserver/server_log"
+      - "/usr/local/vpnserver/packet_log:/var/log/vpnserver/packet_log"
+      - "/usr/local/vpnserver/security_log:/var/log/vpnserver/security_log"
