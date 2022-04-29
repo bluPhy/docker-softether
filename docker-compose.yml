@@ -2,8 +2,6 @@ version: "3"
 services:
   app:
     image: ajleal/softether
-    volumes:
-      - ./vpn_server.config:/usr/vpnserver/vpn_server.config
     cap_add:
       - NET_ADMIN
     ports:
@@ -15,3 +13,6 @@ services:
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
       - "/etc/timezone:/etc/timezone:ro"
+      - vpn_data/vpn_server.config:/usr/vpnserver/vpn_server.config
+volumes:
+  vpn_data:
