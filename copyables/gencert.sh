@@ -1,16 +1,16 @@
 #!/bin/bash
 set -e
 
-/usr/bin/vpnserver start 2>&1 > /dev/null
+/usr/bin/vpnserver start 2>&1 >/dev/null
 
 # while-loop to wait until server comes up
 # switch cipher
-while : ; do
-  set +e
-  /usr/bin/vpncmd localhost /SERVER /CSV /CMD OpenVpnEnable yes /PORTS:1194 2>&1 > /dev/null
-  [[ $? -eq 0 ]] && break
-  set -e
-  sleep 1
+while :; do
+    set +e
+    /usr/bin/vpncmd localhost /SERVER /CSV /CMD OpenVpnEnable yes /PORTS:1194 2>&1 >/dev/null
+    [[ $? -eq 0 ]] && break
+    set -e
+    sleep 1
 done
 
 /usr/bin/vpncmd localhost /SERVER /CSV /CMD ServerCertGet cert

@@ -2,12 +2,12 @@
 FROM alpine:latest as prep
 
 LABEL LABEL maintainer="Alejandro Leal ajleal@protonmail.com" \
-      contributors="" \
-      softetherversion="Latest_Stable"
-      
+    contributors="" \
+    softetherversion="Latest_Stable"
+
 RUN apk fix && \
     apk --no-cache --update add git git-lfs
- 
+
 RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git /usr/local/src/SoftEtherVPN_Stable
 
 
@@ -58,7 +58,7 @@ RUN apt-get update \
     && rm -rf /opt \
     && ln -s /usr/vpnserver /opt \
     && find /usr/bin/vpn* -type f ! -name vpnserver \
-       -exec bash -c 'ln -s {} /opt/$(basename {})' \;
+    -exec bash -c 'ln -s {} /opt/$(basename {})' \;
 
 WORKDIR /usr/vpnserver/
 
