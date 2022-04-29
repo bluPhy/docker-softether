@@ -1,36 +1,71 @@
 # SoftEther VPN server
-FROM debian:stable-slim
-LABEL maintainer="Alejandro Leal ajleal@protonmail.com"
-LABEL softetherversion="Latest_Stable"
+FROM alpine:latest as prep
 
-ENV VERSION "Latest_Stable"
+LABEL LABEL maintainer="Alejandro Leal ajleal@protonmail.com" \
+      contributors="" \
+      softetherversion="Latest_Stable"
+      
+RUN apk fix && \
+    apk --no-cache --update add git git-lfs
+ 
+RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git /usr/local/src/SoftEtherVPN_Stable
+
+
+FROM debian:stable as build
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-WORKDIR /usr/local/vpnserver
+COPY --from=prep /usr/local/src /usr/local/src
 
-RUN apt-get update
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    build-essential \
+    libncurses6 \
+    libncurses-dev \
+    libreadline7 \
+    libreadline-dev \
+    libssl1.1 \
+    libssl-dev \
+    wget \
+    zlib1g \
+    zlib1g-dev \
+    zip \
+    && cd /usr/local/src/SoftEtherVPN_Stable \
+    && ./configure \
+    && make \
+    && make install \
+    && touch /usr/vpnserver/vpn_server.config \
+    && zip -r9 /artifacts.zip /usr/vpn* /usr/bin/vpn*
 
-RUN apt-get -y -q install iptables gcc make wget && \
-        apt-utils git build-essential libreadline-dev && \
-        libssl-dev libncurses-dev zlib1g-dev
+FROM debian:stable-slim
 
-RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git ./SoftEtherVPN &&\
-        cd SoftEtherVPN &&\
-        ./configure &&\
-        make &&\
-        make install &&\
-        cd ..
+COPY --from=build /artifacts.zip /
 
-RUN     apt -y -q autoremove && \
-        apt-get clean && \
-        apt-get purge -y -q --auto-remove gcc make wget git build-essential libreadline-dev libssl-dev libncurses-dev zlib1g-dev && \
-        rm -rf /var/cache/apt/* /var/lib/apt/lists/* && \
-        rm -rf SoftEtherVPN
+COPY copyables /
 
-ADD runner.sh /usr/local/vpnserver/runner.sh
-RUN chmod 755 /usr/local/vpnserver/runner.sh
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    libncurses6 \
+    libreadline7 \
+    libssl1.1 \
+    iptables \
+    unzip \
+    zlib1g \
+    && unzip -o /artifacts.zip -d / \
+    && rm -rf /var/lib/apt/lists/* \
+    && chmod +x /entrypoint.sh /gencert.sh \
+    && rm /artifacts.zip \
+    && rm -rf /opt \
+    && ln -s /usr/vpnserver /opt \
+    && find /usr/bin/vpn* -type f ! -name vpnserver \
+       -exec bash -c 'ln -s {} /opt/$(basename {})' \;
 
-EXPOSE 443/tcp 992/tcp 1194/tcp 1194/udp 5555/tcp 500/udp 4500/udp
+WORKDIR /usr/vpnserver/
 
-ENTRYPOINT ["/usr/local/vpnserver/runner.sh"]
+VOLUME ["/usr/vpnserver/server_log/", "/usr/vpnserver/packet_log/", "/usr/vpnserver/security_log/"]
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+EXPOSE 500/udp 4500/udp 1701/tcp 1194/udp 5555/tcp 443/tcp
+
+CMD ["/usr/bin/vpnserver", "execsvc"]
