@@ -58,7 +58,7 @@ RUN apt-get update \
     && rm -rf /opt \
     && ln -s /usr/vpnserver /opt \
     && find /usr/bin/vpn* -type f ! -name vpnserver \
-    -exec bash -c 'ln -s {} /opt/$(basename {})' \;
+    -exec bash -c 'ln -s {} /opt/$(basename {})'
 
 WORKDIR /usr/vpnserver/
 
