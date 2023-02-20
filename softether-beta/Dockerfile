@@ -1,7 +1,7 @@
 # SoftEther VPN server
 FROM ubuntu:20.04
 LABEL maintainer="Alejandro Leal ale@bluphy.com"
-LABEL softetherversion="vv4.41-9782-beta-2022.11.17"
+LABEL softetherversion="v4.41-9782-beta-2022.11.17"
 
 ENV VERSION v4.41-9782-beta-2022.11.17
 
