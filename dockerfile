@@ -3,7 +3,8 @@ FROM alpine:latest as prep
 
 LABEL LABEL maintainer="Alejandro Leal ale@bluphy.com" \
     contributors="" \
-    softetherversion="Latest_Stable"
+    softetherversion="Latest_Stable" \
+    updatetime="2023-02-23"
 
 RUN apk fix && \
     apk --no-cache --update add git git-lfs
