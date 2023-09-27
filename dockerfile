@@ -48,7 +48,7 @@ COPY --from=build /artifacts.zip /
 
 COPY copyables /
 
-RUN apt-get update
+RUN apt-get update && apt-get dist-upgrade -y
 
 RUN apt-get install -y --no-install-recommends \
     libncurses6 \
