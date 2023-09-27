@@ -4,7 +4,7 @@ FROM alpine:latest as prep
 LABEL LABEL maintainer="Alejandro Leal ale@bluphy.com" \
     contributors="" \
     softetherversion="Latest_Stable" \
-    updatetime="2023-Feb-20"
+    updatetime="2023-Sep-27"
 
 RUN apk fix && \
     apk --no-cache --update add git git-lfs
@@ -53,6 +53,8 @@ RUN apt-get update \
     unzip \
     zlib1g \
     && unzip -o /artifacts.zip -d / \
+    && apt-get autoremove --purge -y  \
+    && apt-get clean  -y \
     && rm -rf /var/lib/apt/lists/* \
     && chmod +x /entrypoint.sh /gencert.sh \
     && rm /artifacts.zip \
