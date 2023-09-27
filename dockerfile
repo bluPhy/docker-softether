@@ -18,20 +18,24 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 COPY --from=prep /usr/local/src /usr/local/src
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+RUN apt-get update
+
+RUN apt-get install -y --no-install-recommends \
     build-essential \
+    wget \
+    zip
+
+RUN apt-get install -y --no-install-recommends \
     libncurses6 \
     libreadline8 \
     libncurses-dev \
     libreadline-dev \
-    libssl1.1 \
+    libssl3 \
     libssl-dev \
-    wget \
     zlib1g \
-    zlib1g-dev \
-    zip \
-    && cd /usr/local/src/SoftEtherVPN_Stable \
+    zlib1g-dev
+
+RUN cd /usr/local/src/SoftEtherVPN_Stable \
     && ./configure \
     && make \
     && make install \
@@ -44,11 +48,12 @@ COPY --from=build /artifacts.zip /
 
 COPY copyables /
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+RUN apt-get update
+
+RUN apt-get install -y --no-install-recommends \
     libncurses6 \
     libreadline8 \
-    libssl1.1 \
+    libssl3 \
     iptables \
     unzip \
     zlib1g \
