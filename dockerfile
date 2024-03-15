@@ -18,14 +18,14 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 COPY --from=prep /usr/local/src /usr/local/src
 
-RUN apt-get update
+RUN apt update
 
-RUN apt-get install -y --no-install-recommends \
+RUN apt install -y --no-install-recommends \
     build-essential \
     wget \
     zip
 
-RUN apt-get install -y --no-install-recommends \
+RUN apt install -y --no-install-recommends \
     libncurses6 \
     libreadline8 \
     libncurses-dev \
@@ -48,9 +48,9 @@ COPY --from=build /artifacts.zip /
 
 COPY copyables /
 
-RUN apt-get update && apt-get dist-upgrade -y
+RUN apt update && apt dist-upgrade -y
 
-RUN apt-get install -y --no-install-recommends \
+RUN apt install -y --no-install-recommends \
     libncurses6 \
     libreadline8 \
     libssl3 \
@@ -58,8 +58,10 @@ RUN apt-get install -y --no-install-recommends \
     unzip \
     zlib1g \
     && unzip -o /artifacts.zip -d / \
-    && apt-get autoremove --purge -y  \
-    && apt-get clean  -y \
+    && apt remove -y gcc perl \
+    && apt autoremove --purge -y  \
+    && apt clean  -y \
+    && DEBIAN_FRONTEND=noninteractive dpkg -r apt \
     && rm -rf /var/lib/apt/lists/* \
     && chmod +x /entrypoint.sh /gencert.sh \
     && rm /artifacts.zip \
