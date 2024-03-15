@@ -12,7 +12,7 @@ RUN apk fix && \
 RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git /usr/local/src/SoftEtherVPN_Stable
 
 
-FROM debian:stable as build
+FROM debian:stable-slim as build
 
 ARG DEBIAN_FRONTEND=noninteractive
 
