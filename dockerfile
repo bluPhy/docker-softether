@@ -42,6 +42,11 @@ RUN cd /usr/local/src/SoftEtherVPN_Stable \
     && touch /usr/vpnserver/vpn_server.config \
     && zip -r9 /artifacts.zip /usr/vpn* /usr/bin/vpn*
 
+RUN apt remove -y gcc perl make build-essential \
+    && apt autoremove --purge -y  \
+    && apt clean  -y \
+    && rm -rf /var/lib/apt/lists/*
+
 FROM debian:stable-slim
 
 COPY --from=build /artifacts.zip /
@@ -58,7 +63,6 @@ RUN apt install -y --no-install-recommends \
     unzip \
     zlib1g \
     && unzip -o /artifacts.zip -d / \
-    && apt remove -y gcc perl \
     && apt autoremove --purge -y  \
     && apt clean  -y \
     && DEBIAN_FRONTEND=noninteractive dpkg -r apt \
