@@ -4,13 +4,12 @@ FROM alpine:latest as prep
 LABEL LABEL maintainer="Alejandro Leal ale@bluphy.com" \
     contributors="" \
     softetherversion="Latest_Stable" \
-    updatetime="2024-Mar-05"
+    updatetime="2024-Mar-27"
 
 RUN apk fix && \
     apk --no-cache --update add git git-lfs
 
 RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git /usr/local/src/SoftEtherVPN_Stable
-
 
 FROM debian:stable-slim as build
 
