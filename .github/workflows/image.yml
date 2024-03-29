@@ -31,7 +31,7 @@ jobs:
           version: latest
       - name: build the image
         run: |
-          docker buildx build --push --tag $TAG --platform $PLATFORMS .
+          docker build . --tag $TAG
       - name: Download Wiz CLI
         run: curl -o wizcli https://wizcli.app.wiz.io/latest/wizcli && chmod +x wizcli
       - name: Authenticate to Wiz and run wiz-cli docker image scan
@@ -42,3 +42,6 @@ jobs:
           POLICY: "Default vulnerabilities policy" # Set the desired Wiz CLI policy to use
           WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
           WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
+      - name: build the image
+        run: |
+          docker buildx build --push --tag $TAG --platform $PLATFORMS .
