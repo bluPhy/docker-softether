@@ -1,6 +1,7 @@
 # Docker image for SoftEther VPN
 
 This will deploy a fully functional [SoftEther VPN](https://www.softether.org) server as a docker image. Only for the latest RTM version of the product.
+Multi platform image: linux/amd64,linux/amd64/v2,linux/arm64,linux/arm/v7
 
 Available on [Docker Hub](https://hub.docker.com/r/ajleal/softether/).
 Current build version: [SoftEther VPN Stable](https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git)
