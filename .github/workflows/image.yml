@@ -29,7 +29,7 @@ jobs:
         uses: docker/setup-buildx-action@v3.2.0
         with:
           version: latest
-      - name: build the image
+      - name: build image locally and scan with Wiz
         run: |
           docker build . --tag $TAG
       - name: Download Wiz CLI
@@ -42,6 +42,6 @@ jobs:
           POLICY: "Default vulnerabilities policy" # Set the desired Wiz CLI policy to use
           WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
           WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
-      - name: build the image
+      - name: build image and push to dockerhub
         run: |
           docker buildx build --push --tag $TAG --platform $PLATFORMS .
