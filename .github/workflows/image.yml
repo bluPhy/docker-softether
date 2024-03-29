@@ -4,14 +4,21 @@ on:
   push:
     branches: master
     paths:
-      - '**.dockerfile'
-      - 'dockerfile'
-      - '**.sh'
+      - "**.dockerfile"
+      - "dockerfile"
+      - "**.sh"
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      TAG: "ajleal/softether:latest" # Set the tag to use for the image
+      PLATFORMS: "linux/amd64,linux/arm64" # Set the platforms to build the image for
     steps:
-      - name: checkout code
+      - name: check out repository
         uses: actions/checkout@v4.1.1
       - name: login to docker hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -24,4 +31,14 @@ jobs:
           version: latest
       - name: build the image
         run: |
-          docker buildx build --push --tag ajleal/softether:latest --platform linux/amd64,linux/arm64 .
+          docker buildx build --push --tag $TAG --platform $PLATFORMS .
+      - name: Download Wiz CLI
+        run: curl -o wizcli https://wizcli.app.wiz.io/latest/wizcli && chmod +x wizcli
+      - name: Authenticate to Wiz and run wiz-cli docker image scan
+        run: |
+          ./wizcli auth --id "$WIZ_CLIENT_ID" --secret "$WIZ_CLIENT_SECRET"
+          ./wizcli docker scan --image $TAG --policy "$POLICY"
+        env:
+          POLICY: "Default vulnerabilities policy" # Set the desired Wiz CLI policy to use
+          WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
+          WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
