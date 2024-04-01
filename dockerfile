@@ -1,7 +1,7 @@
 # SoftEther VPN server
 FROM alpine:latest as prep
 
-LABEL LABEL maintainer="Alejandro Leal ale@bluphy.com" \
+LABEL maintainer="Alejandro Leal ale@bluphy.com" \
     contributors="" \
     softetherversion="Latest_Stable" \
     updatetime="2024-April-01"
