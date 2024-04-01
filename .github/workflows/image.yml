@@ -37,7 +37,7 @@ jobs:
       - name: Authenticate to Wiz and run wiz-cli docker image scan
         run: |
           ./wizcli auth --id "$WIZ_CLIENT_ID" --secret "$WIZ_CLIENT_SECRET"
-          ./wizcli docker scan --image $TAG --policy "$POLICY"
+          ./wizcli docker scan --image $TAG --policy "$POLICY" --driver mountWithLayers
         env:
           POLICY: "Default vulnerabilities policy" # Set the desired Wiz CLI policy to use
           WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
