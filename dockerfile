@@ -4,7 +4,7 @@ FROM alpine:latest as prep
 LABEL maintainer="Alejandro Leal ale@bluphy.com"
 LABEL contributors=""
 LABEL softetherversion="Latest_Stable"
-LABEL updatetime="2024-April-01"
+LABEL updatetime="2024-April-02"
 
 RUN apk fix && apk --no-cache --update add git git-lfs
 
