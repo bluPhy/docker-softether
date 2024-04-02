@@ -1,5 +1,4 @@
-name: Build
-
+name: Build and Wiz Full Scan
 on:
   push:
     branches: master
@@ -7,21 +6,20 @@ on:
       - "**.dockerfile"
       - "dockerfile"
       - "**.sh"
+env:
+  TAG: "ajleal/softether:latest" # Set the tag to use for the image
+  PLATFORMS: "linux/amd64,linux/amd64/v2,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
+
 jobs:
   build:
-    runs-on: ubuntu-latest
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    name: Build
+    runs-on: ubuntu-latest # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
         shell: bash
-    env:
-      TAG: "ajleal/softether:latest" # Set the tag to use for the image
-      PLATFORMS: "linux/amd64,linux/amd64/v2,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
     steps:
-      - name: check out repository
+      - name: Check out code
         uses: actions/checkout@v4.1.1
-      - name: login to docker hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
       - name: Docker Setup QEMU
         uses: docker/setup-qemu-action@v3.0.0
       - name: Set up Docker Buildx
@@ -29,19 +27,53 @@ jobs:
         uses: docker/setup-buildx-action@v3.2.0
         with:
           version: latest
-      - name: build image locally and scan with Wiz
-        run: |
-          docker build . --tag $TAG
-      - name: Download Wiz CLI
-        run: curl -o wizcli https://wizcli.app.wiz.io/latest/wizcli && chmod +x wizcli
-      - name: Authenticate to Wiz and run wiz-cli docker image scan
-        run: |
-          ./wizcli auth --id "$WIZ_CLIENT_ID" --secret "$WIZ_CLIENT_SECRET"
-          ./wizcli docker scan --image $TAG --policy "$POLICY"
-        env:
-          POLICY: "Default vulnerabilities policy" # Set the desired Wiz CLI policy to use
-          WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
-          WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
-      - name: build image and push to dockerhub
-        run: |
-          docker buildx build --push --tag $TAG --platform $PLATFORMS .
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      # - name: build image locally and scan with Wiz
+      #   run: |
+      #     docker build . --tag $TAG
+      - name: Build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: $PLATFORMS
+          sbom: true
+          push: false
+          tags: $TAG
+  wiz-full-scan:
+    needs: build
+    name: wiz-full-scan
+    runs-on: ubuntu-latest
+    steps:
+      # Run both wiz iac and docker scans, and upload the results to Wiz
+      - name: Wiz Full Scan With Default Values
+        uses: aleksei-aikashev/wizcli-wrapper@v1
+        with:
+          # IaC scan defaults
+          iac_scan_path: "."
+          wiz_iac_policy: "Default IaC policy"
+          wiz_iac_report_name: "${{ github.repository }}-${{ github.run_number }}"
+          wiz_iac_tags: "repo=${{ github.repository }},commit_sha=${{ github.sha }},pr_title=${{ github.event.pull_request.title }},event_name=${{ github.event_name }},github_workflow=${{ github.workflow }}"
+          skip_iac_scan: null
+
+          # Docker images vulnerability scan defaults
+          docker_scan_path: "."
+          wiz_docker_vulnerabilities_policy: "Default vulnerabilities policy"
+          wiz_docker_report_name: "${{ github.repository }}-${{ github.run_number }}"
+          skip_docker_scan: null
+
+          # Common inputs
+          wiz_client_id: ${{ secrets.WIZ_CLIENT_ID }}
+          wiz_client_secret: ${{ secrets.WIZ_CLIENT_SECRET }}
+      - name: Image Push
+        if: ${{ success() }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: $PLATFORMS
+          sbom: true
+          push: true
+          tags: $TAG

@@ -1,13 +1,12 @@
 # SoftEther VPN server
 FROM alpine:latest as prep
 
-LABEL maintainer="Alejandro Leal ale@bluphy.com" \
-    contributors="" \
-    softetherversion="Latest_Stable" \
-    updatetime="2024-April-01"
+LABEL maintainer="Alejandro Leal ale@bluphy.com"
+LABEL contributors=""
+LABEL softetherversion="Latest_Stable"
+LABEL updatetime="2024-April-01"
 
-RUN apk fix && \
-    apk --no-cache --update add git git-lfs
+RUN apk fix && apk --no-cache --update add git git-lfs
 
 RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git /usr/local/src/SoftEtherVPN_Stable
 
@@ -17,7 +16,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 COPY --from=prep /usr/local/src /usr/local/src
 
-RUN apt update
+#RUN apt update
 
 RUN apt install -y --no-install-recommends \
     build-essential \
@@ -41,7 +40,7 @@ RUN cd /usr/local/src/SoftEtherVPN_Stable \
     && touch /usr/vpnserver/vpn_server.config \
     && zip -r9 /artifacts.zip /usr/vpn* /usr/bin/vpn*
 
-RUN apt remove -y gcc perl make build-essential \
+RUN apt remove -y gcc perl make build-essential wget curl \
     && apt autoremove --purge -y  \
     && apt clean  -y \
     && rm -rf /var/lib/apt/lists/*
