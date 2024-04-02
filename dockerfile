@@ -16,8 +16,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 COPY --from=prep /usr/local/src /usr/local/src
 
-#RUN apt update
-
 RUN apt install -y --no-install-recommends \
     build-essential \
     wget \
