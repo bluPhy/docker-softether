@@ -1,12 +1,12 @@
 # SoftEther VPN server
-FROM alpine:latest as prep
+FROM cgr.dev/chainguard/wolfi-base as prep
 
 LABEL maintainer="Alejandro Leal ale@bluphy.com"
 LABEL contributors=""
 LABEL softetherversion="Latest_Stable"
 LABEL updatetime="2024-April-02"
 
-RUN apk fix && apk --no-cache --update add git
+RUN apk update && apk add --no-cache --update-cache git
 
 RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git /usr/local/src/SoftEtherVPN_Stable
 
