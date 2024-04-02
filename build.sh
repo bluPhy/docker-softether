@@ -1,1 +1,0 @@
-docker buildx build --push --tag ajleal/softether:latest --platform linux/amd64,linux/arm64 .
