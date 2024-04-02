@@ -39,10 +39,10 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: $PLATFORMS
+          platforms: "$PLATFORMS"
           sbom: true
           push: false
-          tags: $TAG
+          tags: "$TAG"
   wiz-full-scan:
     needs: build
     name: wiz-full-scan
