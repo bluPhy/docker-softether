@@ -7,7 +7,6 @@ LABEL softetherversion="Latest_Stable"
 LABEL updatetime="2024-April-02"
 
 RUN apk update && apk add --no-cache --update-cache git
-
 RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git /usr/local/src/SoftEtherVPN_Stable
 
 FROM debian:stable-slim as build
