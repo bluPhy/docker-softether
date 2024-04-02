@@ -6,7 +6,7 @@ LABEL contributors=""
 LABEL softetherversion="Latest_Stable"
 LABEL updatetime="2024-April-02"
 
-RUN apk fix && apk --no-cache --update add git git-lfs
+RUN apk fix && apk --no-cache --update add git
 
 RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git /usr/local/src/SoftEtherVPN_Stable
 
