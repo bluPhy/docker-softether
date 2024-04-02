@@ -16,12 +16,14 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 COPY --from=prep /usr/local/src /usr/local/src
 
-RUN apt update && apt install -y --no-install-recommends --no-cache \
+RUN apt update
+
+RUN apt install -y --no-install-recommends \
     build-essential \
     wget \
     zip
 
-RUN apt install -y --no-install-recommends --no-cache \
+RUN apt install -y --no-install-recommends \
     libncurses6 \
     libreadline8 \
     libncurses-dev \
@@ -51,7 +53,7 @@ COPY copyables /
 
 RUN apt update && apt dist-upgrade -y
 
-RUN apt install -y --no-install-recommends --no-cache \
+RUN apt install -y --no-install-recommends \
     libncurses6 \
     libreadline8 \
     libssl3 \
