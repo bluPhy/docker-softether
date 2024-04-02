@@ -58,7 +58,7 @@ jobs:
           # Docker images vulnerability scan defaults
           docker_scan_path: "."
           wiz_docker_vulnerabilities_policy: "Default vulnerabilities policy"
-          wiz_docker_report_name: "${{ github.repository }}-${{ github.run_number }}"
+          wiz_docker_report_name: "ajleal/softether:latest"
           skip_docker_scan: null
 
           # Common inputs
