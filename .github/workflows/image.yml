@@ -6,10 +6,6 @@ on:
       - "**.dockerfile"
       - "dockerfile"
       - "**.sh"
-env:
-  TAG: "ajleal/softether:latest" # Set the tag to use for the image
-  PLATFORMS: "linux/amd64,linux/amd64/v2,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
-
 jobs:
   build:
     name: Build
@@ -43,6 +39,9 @@ jobs:
           sbom: true
           push: false
           tags: "$TAG"
+        env:
+          TAG: "ajleal/softether:latest" # Set the tag to use for the image
+          PLATFORMS: "linux/amd64,linux/amd64/v2,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
   wiz-full-scan:
     needs: build
     name: wiz-full-scan
@@ -77,3 +76,6 @@ jobs:
           sbom: true
           push: true
           tags: $TAG
+        env:
+          TAG: "ajleal/softether:latest"
+          PLATFORMS: "linux/amd64,linux/amd64/v2,linux/arm64,linux/arm/v7"
