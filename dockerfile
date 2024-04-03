@@ -9,24 +9,20 @@ LABEL updatetime="2024-April-02"
 RUN apk update && apk add --no-cache git
 RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git /usr/local/src/SoftEtherVPN_Stable
 
-FROM debian:stable-slim as build
+FROM alpine:latest as build
 
 COPY --from=prep /usr/local/src /usr/local/src
 
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apt update
-RUN apt install -y --no-install-recommends \
-    build-essential \
-    wget \
-    tar \
-    libncurses6 \
-    libreadline8 \
-    libncurses-dev \
-    libreadline-dev \
-    libssl3 \
-    libssl-dev \
-    zlib1g \
-    zlib1g-dev
+RUN apk add --no-cache \
+      binutils \
+      build-base \
+      readline-dev \
+      openssl-dev \
+      ncurses-dev \
+      git \
+      cmake \
+      gnu-libiconv \
+      zlib-dev
 
 RUN cd /usr/local/src/SoftEtherVPN_Stable \
     && ./configure \
@@ -35,32 +31,19 @@ RUN cd /usr/local/src/SoftEtherVPN_Stable \
     && touch /usr/vpnserver/vpn_server.config \
     && tar -czf /artifacts.tar.gz /usr/vpn* /usr/bin/vpn*
 
-RUN apt remove -y gcc perl make build-essential wget curl \
-    && apt autoremove --purge -y  \
-    && apt clean  -y \
-    && rm -rf /var/lib/apt/lists/*
-
-FROM debian:stable-slim
+FROM alpine:latest
 
 COPY --from=build /artifacts.tar.gz /
 
 COPY copyables /
 
-ARG DEBIAN_FRONTEND=noninteractive
-
-RUN apt update && apt dist-upgrade -y
-
-RUN apt install -y --no-install-recommends \
-    libncurses6 \
-    libreadline8 \
-    libssl3 \
-    iptables \
-    zlib1g \
+RUN apk add --no-cache \
+      ca-certificates \
+      iptables \
+      readline \
+      gnu-libiconv \
+      zlib \
     && tar xfz artifacts.tar.gz -C / \
-    && apt autoremove --purge -y  \
-    && apt clean  -y \
-    && DEBIAN_FRONTEND=noninteractive dpkg -r apt \
-    && rm -rf /var/lib/apt/lists/* \
     && chmod +x /entrypoint.sh /gencert.sh \
     && rm artifacts.tar.gz \
     && rm -rf /opt \
