@@ -14,13 +14,6 @@ jobs:
       run:
         shell: bash
     steps:
-      - name: Set Up contained image store
-        run: |
-          cat /etc/docker/daemon.json | jq '. | .+{"features": {"containerd-snapshotter": true}}' | sudo tee /etc/docker/daemon.json
-          cat /etc/docker/daemon.json
-          sudo systemctl restart docker
-          docker info -f '{{ .DriverStatus }}'
-          docker info -f '{{ .Driver }}'
       - name: Docker Setup QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
