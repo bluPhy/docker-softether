@@ -80,5 +80,5 @@ jobs:
           platforms: "linux/amd64,linux/amd64/v2,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
           tags: "ajleal/softether:latest" # Set the tag to use for the image
           provenance: mode=max
-          sbom: false
+          sbom: true
           push: true
