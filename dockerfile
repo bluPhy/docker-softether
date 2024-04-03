@@ -11,10 +11,9 @@ RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git /usr/local
 
 FROM debian:stable-slim as build
 
-ARG DEBIAN_FRONTEND=noninteractive
-
 COPY --from=prep /usr/local/src /usr/local/src
 
+ARG DEBIAN_FRONTEND=noninteractive
 RUN apt update
 RUN apt install -y --no-install-recommends \
     build-essential \
@@ -46,6 +45,8 @@ FROM debian:stable-slim
 COPY --from=build /artifacts.zip /
 
 COPY copyables /
+
+ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt update && apt dist-upgrade -y
 
