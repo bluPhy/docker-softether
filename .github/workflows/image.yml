@@ -51,7 +51,12 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+<<<<<<< HEAD
       - name: Wiz Full Scan With Default Values # Run both wiz iac and docker scans, and upload the results to Wiz
+=======
+      # Run both wiz iac and docker scans, and upload the results to Wiz
+      - name: Wiz Full Scan With Default Values
+>>>>>>> parent of 540e77b (Update image.yml)
         uses: aleksei-aikashev/wizcli-wrapper@v1
         with:
           # IaC scan defaults
