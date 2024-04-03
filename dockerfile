@@ -4,7 +4,7 @@ FROM alpine:latest as prep
 LABEL maintainer="Alejandro Leal ale@bluphy.com"
 LABEL contributors=""
 LABEL softetherversion="latest_stable"
-LABEL updatetime="2024-April-02"
+LABEL updatetime="2024-April-03"
 
 RUN apk update && apk add --no-cache git
 RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git /usr/local/src/SoftEtherVPN_Stable
