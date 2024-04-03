@@ -22,19 +22,7 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v3
         with:
-          version: latest  
-      - name: Setup containerd # Setup containerd for buildx as attestation is not supported for the docker driver.
-        uses: crazy-max/ghaction-setup-containerd@v3
-        with:
-          containerd-version: latest
-        env:
-          DOCKER_CLI_EXPERIMENTAL: enabled
-      - name: Setup containerd # Setup containerd for buildx as attestation is not supported for the docker driver.
-        uses: crazy-max/ghaction-setup-containerd@v3
-        with:
-          containerd-version: latest
-        env:
-          DOCKER_CLI_EXPERIMENTAL: enabled
+          version: latest
       - name: Set Up contained image store
         run: |
           cat /etc/docker/daemon.json | jq '. | .+{"features": {"containerd-snapshotter": true}}' | sudo tee /etc/docker/daemon.json
@@ -55,6 +43,12 @@ jobs:
       run:
         shell: bash
     steps:
+      - name: Setup containerd # Setup containerd for buildx as attestation is not supported for the docker driver.
+        uses: crazy-max/ghaction-setup-containerd@v3
+        with:
+          containerd-version: latest
+        env:
+          DOCKER_CLI_EXPERIMENTAL: enabled
       - name: Build
         uses: docker/build-push-action@v5
         with:
