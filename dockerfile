@@ -6,7 +6,7 @@ LABEL contributors=""
 LABEL softetherversion="latest_stable"
 LABEL updatetime="2024-April-02"
 
-RUN apk update && apk add --no-cache --update-cache git
+RUN apk update && apk add --no-cache git
 RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git /usr/local/src/SoftEtherVPN_Stable
 
 FROM debian:stable-slim as build
@@ -18,7 +18,6 @@ RUN apt update
 RUN apt install -y --no-install-recommends \
     build-essential \
     wget \
-    #zip \
     tar \
     libncurses6 \
     libreadline8 \
@@ -34,7 +33,6 @@ RUN cd /usr/local/src/SoftEtherVPN_Stable \
     && make \
     && make install \
     && touch /usr/vpnserver/vpn_server.config \
-    #&& zip -r9 /artifacts.zip /usr/vpn* /usr/bin/vpn* \
     && tar -czf /artifacts.tar.gz /usr/vpn* /usr/bin/vpn*
 
 RUN apt remove -y gcc perl make build-essential wget curl \
@@ -57,16 +55,13 @@ RUN apt install -y --no-install-recommends \
     libreadline8 \
     libssl3 \
     iptables \
-    unzip \
     zlib1g \
-    #&& unzip -o /artifacts.zip -d / \
     && tar xfz artifacts.tar.gz -C / \
     && apt autoremove --purge -y  \
     && apt clean  -y \
     && DEBIAN_FRONTEND=noninteractive dpkg -r apt \
     && rm -rf /var/lib/apt/lists/* \
     && chmod +x /entrypoint.sh /gencert.sh \
-    #&& rm /artifacts.zip \
     && rm artifacts.tar.gz \
     && rm -rf /opt \
     && ln -s /usr/vpnserver /opt \
