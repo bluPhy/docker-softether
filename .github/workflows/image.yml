@@ -53,6 +53,8 @@ jobs:
         uses: crazy-max/ghaction-setup-containerd@v3
         with:
           containerd-version: latest
+        env:
+          DOCKER_CLI_EXPERIMENTAL: enabled
       - name: Wiz Full Scan With Default Values # Run both wiz iac and docker scans, and upload the results to Wiz
         uses: aleksei-aikashev/wizcli-wrapper@v1
         with:
