@@ -59,7 +59,7 @@ jobs:
         run: |
           cat /etc/docker/daemon.json | jq '. | .+{"features": {"containerd-snapshotter": true}}' | sudo tee /etc/docker/daemon.json
           cat /etc/docker/daemon.json
-          systemctl restart docker
+          sudo systemctl restart docker
           docker info -f '{{ .DriverStatus }}'
           docker info -f '{{ .Driver }}'
       - name: Wiz Full Scan With Default Values # Run both wiz iac and docker scans, and upload the results to Wiz
