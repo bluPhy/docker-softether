@@ -35,6 +35,7 @@ RUN cd /usr/local/src/SoftEtherVPN_Stable \
 FROM alpine:latest
 
 COPY --from=build /artifacts.tar.gz /
+
 COPY copyables /
 
 RUN apk add --no-cache \
