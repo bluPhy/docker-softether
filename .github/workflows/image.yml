@@ -86,7 +86,7 @@ jobs:
           outputs: type=oci,dest=image.tar
       - name: Import image in containerd
         run: |
-          sudo ctr i import --base-name docker.io/ajleal/softether --digests --all-platforms image.tar
+          ctr i import --base-name docker.io/ajleal/softether --digests --all-platforms image.tar
       - name: Push image with containerd
         run: |
-          sudo ctr i push --user "${{ secrets.DOCKER_USERNAME }}:${{ secrets.DOCKER_PASSWORD }}" docker.io/ajleal/softether:latest
+          ctr i push --user "${{ secrets.DOCKER_USERNAME }}:${{ secrets.DOCKER_PASSWORD }}" docker.io/ajleal/softether:latest
