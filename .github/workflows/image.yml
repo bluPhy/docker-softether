@@ -9,10 +9,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest] #Values ubuntu-latest, macos-latest, or windows-latest
+    runs-on: [ubuntu-latest] #Values ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
         shell: bash #Use the Bash shell regardless whether the GitHub Actions runner is Linux, Windows, or macOS
