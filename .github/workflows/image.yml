@@ -7,63 +7,54 @@ on:
       - "dockerfile"
       - "**.sh"
 jobs:
-  prep:
-    name: Prepare
-    runs-on: ubuntu-latest # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest] #Values ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
-        shell: bash
+        shell: bash #Use the Bash shell regardless whether the GitHub Actions runner is Linux, Windows, or macOS
     steps:
+      - name: Check out code
+        uses: actions/checkout@v4
       - name: Docker Setup QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          version: latest
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Check out code
-        uses: actions/checkout@v4
-  build:  # Define the job that builds the Docker image
-    needs: prep
-    name: Build
-    runs-on: ubuntu-latest # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
-    defaults:
-      run:
-        shell: bash
-    steps:
+      # - name: build image locally and scan with Wiz
+      #   run: |
+      #     docker build . --tag $TAG
       - name: Build
         uses: docker/build-push-action@v5
         with:
           context: .
           platforms: "linux/amd64,linux/amd64/v2,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
           tags: "ajleal/softether:latest" # Set the tag to use for the image
-          sbom: false
+          sbom: true
           push: false
-  wiz-full-scan: # Define the job that runs the Wiz Full Scan
+  wiz-full-scan:
     needs: build
     name: wiz-full-scan
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v4
-<<<<<<< HEAD
       - name: Wiz Full Scan With Default Values # Run both wiz iac and docker scans, and upload the results to Wiz
-=======
-      # Run both wiz iac and docker scans, and upload the results to Wiz
-      - name: Wiz Full Scan With Default Values
->>>>>>> parent of 540e77b (Update image.yml)
         uses: aleksei-aikashev/wizcli-wrapper@v1
         with:
           # IaC scan defaults
           iac_scan_path: "."
           wiz_iac_policy: "Default IaC policy"
-          wiz_iac_report_name: "${{ github.repository }}-${{ github.run_number }}"
-          wiz_iac_tags: "repo=${{ github.repository }},commit_sha=${{ github.sha }},pr_title=${{ github.event.pull_request.title }},event_name=${{ github.event_name }},github_workflow=${{ github.workflow }}"
+          wiz_iac_report_name: "ajleal/softether:latest""-${{ github.repository }}-${{ github.run_number }}"
+          wiz_iac_tags: "repo=${{ github.repository }},commit_sha=${{ github.sha }},event_name=${{ github.event_name }},github_workflow=${{ github.workflow }}"
           skip_iac_scan: null
 
           # Docker images vulnerability scan defaults
@@ -82,6 +73,5 @@ jobs:
           context: .
           platforms: "linux/amd64,linux/amd64/v2,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
           tags: "ajleal/softether:latest" # Set the tag to use for the image
-          #provenance: mode=max
           sbom: false
           push: true
