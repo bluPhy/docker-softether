@@ -55,4 +55,4 @@ jobs:
       - name: build image and push to dockerhub
         if: ${{ success() }}
         run: |
-          docker buildx build --push --tag $TAG --platform $PLATFORMS .
+          docker buildx build --push --attest type=sbom --tag $TAG --platform $PLATFORMS .
