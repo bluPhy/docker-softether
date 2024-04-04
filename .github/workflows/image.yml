@@ -47,10 +47,9 @@ jobs:
       - name: Wiz Full Scan With Default Values # Run both wiz iac and docker scans, and upload the results to Wiz
         uses: aleksei-aikashev/wizcli-wrapper@v1
         with:
-          # IaC scan defaults
-          iac_scan_path: "."
-          wiz_iac_policy: "Default IaC policy"
-          wiz_iac_report_name: "ajleal/softether:latest""-${{ github.repository }}-${{ github.run_number }}"
+          iac_scan_path: "." 
+          wiz_iac_policy: "Default IaC policy" # IaC scan defaults
+          wiz_iac_report_name: "ajleal/softether:latest-${{ github.repository }}-${{ github.run_number }}"
           wiz_iac_tags: "repo=${{ github.repository }},commit_sha=${{ github.sha }},event_name=${{ github.event_name }},github_workflow=${{ github.workflow }}"
           skip_iac_scan: null
 
