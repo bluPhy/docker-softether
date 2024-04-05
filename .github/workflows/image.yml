@@ -8,7 +8,7 @@ on:
       - "**.sh"
 jobs:
   build:
-    name: Build and Push to DockerHub
+    name: Build and scan with Wiz.io
     runs-on: ubuntu-latest
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
