@@ -29,7 +29,7 @@ jobs:
           version: latest
       - name: build image locally
         run: |
-          docker buildx build --tag $TAG --driver=docker-container .
+          docker buildx build --tag $TAG .
       - name: Wiz Full Scan With Default Values # Run both wiz iac and docker scans, and upload the results to Wiz
         uses: aleksei-aikashev/wizcli-wrapper@v1
         with:
@@ -78,7 +78,7 @@ jobs:
       - name: build image and push to dockerhub
         if: ${{ success() }}
         run: |
-          docker buildx build --push --tag $TAG --driver=docker-container --platform $PLATFORMS .
+          docker buildx build --push --tag $TAG --platform $PLATFORMS .
   Push-to-ACR:
     needs: build
     if: ${{ success() }}
@@ -109,4 +109,4 @@ jobs:
       - name: build image and push to dockerhub
         if: ${{ success() }}
         run: |
-          docker buildx build --push --tag $TAG --driver=docker-container --platform $PLATFORMS .
+          docker buildx build --push --tag $TAG --platform $PLATFORMS .
