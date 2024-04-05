@@ -7,6 +7,7 @@ LABEL softetherversion="latest_stable"
 LABEL updatetime="2024-April-05"
 
 RUN apk update && apk add --no-cache git
+
 RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git /usr/local/src/SoftEtherVPN_Stable
 
 FROM alpine:latest as build
