@@ -48,10 +48,6 @@ jobs:
           # Common inputs
           wiz_client_id: ${{ secrets.WIZ_CLIENT_ID }}
           wiz_client_secret: ${{ secrets.WIZ_CLIENT_SECRET }}
-      - name: build image and push to dockerhub
-        if: ${{ success() }}
-        run: |
-          docker buildx build --push --attest type=sbom --tag $TAG --platform $PLATFORMS .
   Push-to-DockerHub:
     needs: build
     if: ${{ success() }}
