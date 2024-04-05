@@ -54,6 +54,7 @@ jobs:
           docker buildx build --push --attest type=sbom --tag $TAG --platform $PLATFORMS .
   Push-to-DockerHub:
     needs: build
+    if: ${{ success() }}
     runs-on: ubuntu-latest
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
@@ -77,6 +78,7 @@ jobs:
           docker buildx build --push --attest type=sbom --tag $TAG --platform $PLATFORMS .
   Push-to-ACR:
     needs: build
+    if: ${{ success() }}
     runs-on: ubuntu-latest
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
