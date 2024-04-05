@@ -51,6 +51,7 @@ jobs:
           wiz_client_secret: ${{ secrets.WIZ_CLIENT_SECRET }}
   Push-to-DockerHub:
     needs: build
+    name: Push to DockerHub
     if: ${{ success() }}
     runs-on: ubuntu-latest
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
@@ -81,8 +82,9 @@ jobs:
         if: ${{ success() }}
         run: |
           docker buildx build --push --attest type=sbom --tag $TAG --platform $PLATFORMS .
-  Push-to-ACR:
+  Push-to-Azure-ACR:
     needs: build
+    name: Push to Azure ACR
     if: ${{ success() }}
     runs-on: ubuntu-latest
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
