@@ -1,5 +1,5 @@
 # SoftEther VPN server
-FROM alpine:latest as prep
+FROM alpine:edge as prep
 
 LABEL maintainer="Alejandro Leal ale@bluphy.com"
 LABEL contributors=""
@@ -10,7 +10,7 @@ RUN apk update && apk add --no-cache git
 
 RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN_Stable.git /usr/local/src/SoftEtherVPN_Stable
 
-FROM alpine:latest as build
+FROM alpine:edge as build
 
 COPY --from=prep /usr/local/src /usr/local/src
 
