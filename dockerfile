@@ -14,7 +14,7 @@ FROM alpine:latest as build
 
 COPY --from=prep /usr/local/src /usr/local/src
 
-RUN apk add --no-cache \
+RUN apk update && apk add --no-cache \
       binutils \
       build-base \
       readline-dev \
@@ -38,7 +38,7 @@ COPY --from=build /artifacts.tar.gz /
 
 COPY copyables /
 
-RUN apk add --no-cache \
+RUN apk update && apk add --no-cache \
       ca-certificates \
       iptables \
       readline \
