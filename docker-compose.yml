@@ -7,6 +7,7 @@ services:
     cap_add:
       - NET_ADMIN
     ports:
+      # Port mappings for SoftEther VPN Server
       - 500:500/udp
       - 4500:4500/udp
       - 1701:1701/tcp
