@@ -1,5 +1,5 @@
 # SoftEther VPN server
-FROM alpine:edge as prep
+FROM cgr.dev/chainguard/wolfi-base as prep
 
 LABEL maintainer="Alejandro Leal ale@bluphy.com"
 LABEL contributors=""
