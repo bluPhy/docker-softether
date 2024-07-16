@@ -4,7 +4,7 @@ FROM alpine:edge as prep
 LABEL maintainer="Alejandro Leal ale@bluphy.com"
 LABEL contributors=""
 LABEL softetherversion="latest_stable"
-LABEL updatetime="2024-June-26"
+LABEL updatetime="2024-July-16"
 
 RUN apk update && apk add --no-cache git
 

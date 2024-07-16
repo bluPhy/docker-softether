@@ -1,5 +1,4 @@
 # Docker Compose file for running a SoftEther VPN server
-version: "3.8"
 services:
   app:
     image: ajleal/softether
