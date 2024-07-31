@@ -4,7 +4,7 @@ FROM alpine:edge as prep
 LABEL maintainer="Alejandro Leal ale@bluphy.com"
 LABEL contributors=""
 LABEL softetherversion="latest_stable"
-LABEL updatetime="2024-July-16"
+LABEL updatetime="2024-July-31"
 
 RUN apk update && apk add --no-cache git
 
@@ -20,7 +20,6 @@ RUN apk update && apk add --no-cache \
       readline-dev \
       openssl-dev \
       ncurses-dev \
-      git \
       cmake \
       gnu-libiconv \
       zlib-dev
