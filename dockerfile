@@ -8,8 +8,8 @@ FROM alpine:3.19 as prep
 # Metadata labels
 LABEL maintainer="Alejandro Leal ale@bluphy.com"
 LABEL contributors=""
-LABEL softetherversion="latest_stable" # Intended SoftEther version (actual version pinned in git clone)
-LABEL updatetime="2025-May-21"   # Last significant update to this Dockerfile
+LABEL softetherversion="latest_stable"
+LABEL updatetime="2025-May-21"
 
 # Install git to clone the repository, then clone the specific version, and finally remove git.
 RUN apk update && \
