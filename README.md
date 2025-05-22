@@ -24,11 +24,29 @@ Current build version: [SoftEther VPN Stable](https://github.com/SoftEtherVPN/So
 ## Run
 
 Simplest version:
+    This will keep your config and Logfiles in the docker volume ``softetherdata``
 
-    docker run -d --net host --cap-add NET_ADMIN --name softether ajleal/softether
+    docker run -d --rm --name softether-vpn-server -v softetherdata:/mnt -p 443:443/tcp -p 992:992/tcp -p 1194:1194/udp -p 5555:5555/tcp -p 500:500/udp -p 4500:4500/udp -p 1701:1701/udp --cap-add NET_ADMIN ajleal/softether
 
-With external config file:
+### Use vpncmd
 
-    mkdir /etc/vpnserver
-    touch /etc/vpnserver/vpn_server.config
-    docker run -d -v /etc/vpnserver/vpn_server.config:/usr/vpnserver/vpn_server.config --net host --cap-add NET_ADMIN --name softether ajleal/softether
+With newer releases vpncmd is directly in the container so you can use it to configure vpn. You can can run it once the container is running :
+
+`docker exec -it softether-vpn-server vpncmd localhost`
+example to configure a vpnclient
+
+```
+docker exec -it softether-vpn-server vpncmd localhost /client
+
+VPN Client> AccountSet homevpn /SERVER:192.168.1.1:443 /HUB:VPN
+VPN Client> AccountPasswordSet homevpn /PASSWORD:verysecurepassword /TYPE:standard
+VPN Client> AccountConnect homevpn
+
+#Automatically connect once container starts
+VPN Client> AccountStartupSet homevpn
+
+#Checking State
+VPN Client> AccountStatusGet homevpn
+
+```
+
