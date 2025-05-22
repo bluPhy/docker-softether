@@ -16,4 +16,5 @@ services:
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
       - "/etc/timezone:/etc/timezone:ro"
-      - "/etc/vpn_server.config:/usr/vpnserver/vpn_server.config"
+      - "./softether_data:/var/lib/softether"
+      - "./softether_log:/var/log/softether"
