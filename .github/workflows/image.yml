@@ -4,8 +4,7 @@ on:
   push:
     branches: [master]
     paths:
-      - "Dockerfile"
-      - "dockerfile"
+      - "Dockerfile" # Standardize to 'Dockerfile'
       - "**.sh"
 
 env:

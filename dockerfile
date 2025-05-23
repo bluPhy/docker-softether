@@ -42,6 +42,9 @@ VOLUME /var/lib/softether
 VOLUME /run/softether
 COPY --from=builder /usr/local/src/SoftEtherVPN/build/vpncmd /usr/local/src/SoftEtherVPN/build/hamcore.se2 ./
 COPY --from=builder /usr/local/src/SoftEtherVPN/build/libcedar.so /usr/local/src/SoftEtherVPN/build/libmayaqua.so /usr/local/lib/
+
+
+FROM base AS vpnserver
 COPY --from=builder /usr/local/src/SoftEtherVPN/build/vpnserver ./
 EXPOSE 443/tcp 992/tcp 1194/tcp 1194/udp 5555/tcp 500/udp 4500/udp
 CMD ["/usr/local/bin/vpnserver", "execsvc"]
