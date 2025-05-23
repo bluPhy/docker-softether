@@ -1,7 +1,7 @@
 LABEL maintainer="Alejandro Leal ale@bluphy.com"
 LABEL contributors=""
 LABEL softetherversion="latest_stable"
-LABEL updatetime="2025-May-22"
+LABEL updatetime="2025-May-23"
 
 
 FROM alpine AS builder

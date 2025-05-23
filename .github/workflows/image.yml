@@ -23,7 +23,7 @@ jobs:
       run:
         shell: bash
     env:
-      TAG: "ajleal/softether:latest" # Set the tag to use for the image
+      IMAGE_NAME: "ajleal/softether" # Base name for the Docker image (used for local build and Wiz scan reference)
       PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
     steps:
       - name: check out repository
@@ -38,7 +38,9 @@ jobs:
           driver: docker-container
       - name: build image locally
         run: |
-          docker buildx build --attest type=sbom --tag $TAG .
+          docker buildx build --attest type=sbom \
+            --tag "${IMAGE_NAME}:latest" \
+            --tag "${IMAGE_NAME}:${{ github.sha }}" .
       - name: Wiz Full Scan With Default Values # Run both wiz iac and docker scans, and upload the results to Wiz
         uses: aleksei-aikashev/wizcli-wrapper@v1.0.2
         with:
@@ -67,7 +69,7 @@ jobs:
       run:
         shell: bash
     env:
-      TAG: "ajleal/softether:latest" # Set the tag to use for the image
+      IMAGE_NAME: "ajleal/softether" # Base name for the Docker Hub image
       PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
     steps:
       - name: Docker Setup QEMU
@@ -87,7 +89,10 @@ jobs:
       - name: build image and push to dockerhub
         if: ${{ success() }}
         run: |
-          docker buildx build --push --attest type=sbom --tag $TAG --platform $PLATFORMS .
+          docker buildx build --push --attest type=sbom \
+            --tag "${IMAGE_NAME}:latest" \
+            --tag "${IMAGE_NAME}:${{ github.sha }}" \
+            --platform $PLATFORMS .
   Push-to-Azure-ACR:
     needs: build
     name: Push to Azure ACR
@@ -98,7 +103,7 @@ jobs:
       run:
         shell: bash
     env:
-      TAG: "prodmycorpone.azurecr.io/softether:latest" # Set the tag to use for the image
+      IMAGE_NAME: "prodmycorpone.azurecr.io/softether" # Base name for the Azure ACR image
       PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
     steps:
       - name: Docker Setup QEMU
@@ -115,7 +120,10 @@ jobs:
           registry: prodmycorpone.azurecr.io
           username: ${{ secrets.ACR_PRODMYCORPONE_USER }}
           password: ${{ secrets.ACR_PRODMYCORPONE_PASSWORD }}
-      - name: build image and push to dockerhub
+      - name: build image and push to Azure ACR
         if: ${{ success() }}
         run: |
-          docker buildx build --push --attest type=sbom --tag $TAG --platform $PLATFORMS .
+          docker buildx build --push --attest type=sbom \
+            --tag "${IMAGE_NAME}:latest" \
+            --tag "${IMAGE_NAME}:${{ github.sha }}" \
+            --platform $PLATFORMS .
