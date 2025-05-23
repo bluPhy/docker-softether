@@ -1,113 +1,103 @@
-name: Build and Wiz Full Scan
+name: Build, Wiz Scan, and Push Multi-Arch Image
+
 on:
   push:
-    branches: master
+    branches: [master]
     paths:
-      - "Dockerfile"
-      - "dockerfile"
+      - "Dockerfile" # Standardize to 'Dockerfile'
       - "**.sh"
+
+env:
+  DOCKERHUB_IMAGE_REPO: ajleal/softether
+  ACR_REGISTRY_SERVER: prodmycorpone.azurecr.io
+  ACR_IMAGE_REPO: prodmycorpone.azurecr.io/softether
+  IMAGE_TAG: ${{ github.sha }}
+  PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7"
+
 jobs:
-  build:
-    name: Build and scan with Wiz.io
+  build_scan_and_push:
+    name: Build, Scan, and Push
     runs-on: ubuntu-latest
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
         shell: bash
-    env:
-      TAG: "ajleal/softether:latest" # Set the tag to use for the image
-      PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
+
     steps:
-      - name: check out repository
+      - name: Check out repository
         uses: actions/checkout@v4.1.1
+
+      - name: Define Full Image Names with Tags
+        id: image_details
+        run: |
+          echo "dockerhub_image_tagged=${{ env.DOCKERHUB_IMAGE_REPO }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
+          echo "acr_image_tagged=${{ env.ACR_IMAGE_REPO }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
+          echo "scan_image_ref=${{ env.DOCKERHUB_IMAGE_REPO }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
+          echo "dockerhub_image_latest=${{ env.DOCKERHUB_IMAGE_REPO }}:latest" >> $GITHUB_OUTPUT
+          echo "acr_image_latest=${{ env.ACR_IMAGE_REPO }}:latest" >> $GITHUB_OUTPUT
+
       - name: Docker Setup QEMU
         uses: docker/setup-qemu-action@v3.1.0
+
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
         with:
-          version: latest
           driver: docker-container
-      - name: build image locally
+
+      - name: Build image locally for Wiz Scan
         run: |
-          docker buildx build --attest type=sbom --tag $TAG .
-      - name: Wiz Full Scan With Default Values # Run both wiz iac and docker scans, and upload the results to Wiz
+          docker buildx build \
+            --platform ${{ env.PLATFORMS }} \
+            --tag ${{ steps.image_details.outputs.scan_image_ref }} \
+            --attest type=sbom \
+            --load .
+
+      - name: Wiz Full Scan
+        id: wiz_scan # Giving the step an id (optional, but can be useful)
         uses: aleksei-aikashev/wizcli-wrapper@v1.0.2
         with:
           iac_scan_path: "."
-          wiz_iac_policy: "Default IaC policy" # IaC scan defaults
-          wiz_iac_report_name: "ajleal/softether:latest-${{ github.repository }}-${{ github.run_number }}"
-          wiz_iac_tags: "repo=${{ github.repository }},commit_sha=${{ github.sha }},event_name=${{ github.event_name }},github_workflow=${{ github.workflow }}"
-          skip_iac_scan: null
+          wiz_iac_policy: "Default IaC policy"
+          wiz_iac_report_name: "${{ steps.image_details.outputs.scan_image_ref }}-IaC-${{ github.run_id }}"
+          wiz_iac_tags: "repo=${{ github.repository }},commit_sha=${{ github.sha }},event_name=${{ github.event_name }},workflow=${{ github.workflow }}"
 
-          # Docker images vulnerability scan defaults
-          docker_scan_path: "."
+          docker_scan_path: ${{ steps.image_details.outputs.scan_image_ref }}
           wiz_docker_vulnerabilities_policy: "Default vulnerabilities policy"
-          wiz_docker_report_name: "ajleal/softether:latest"
-          skip_docker_scan: null
+          wiz_docker_report_name: "${{ steps.image_details.outputs.scan_image_ref }}-Vulnerabilities-${{ github.run_id }}"
 
-          # Common inputs
           wiz_client_id: ${{ secrets.WIZ_CLIENT_ID }}
           wiz_client_secret: ${{ secrets.WIZ_CLIENT_SECRET }}
-  Push-to-DockerHub:
-    needs: build
-    name: Push to DockerHub
-    if: ${{ success() }}
-    runs-on: ubuntu-latest
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
-    defaults:
-      run:
-        shell: bash
-    env:
-      TAG: "ajleal/softether:latest" # Set the tag to use for the image
-      PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
-    steps:
-      - name: Docker Setup QEMU
-        uses: docker/setup-qemu-action@v3.1.0
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          version: latest
-          driver: docker-container
+        # CRITICAL: For the push to be conditional on this scan, this step MUST exit
+        # with a non-zero status code if the scan finds issues that should block
+        # the deployment according to your "Default IaC policy" or "Default vulnerabilities policy"
+        # in Wiz. If this step always exits with 0 (success) regardless of findings,
+        # subsequent steps will run.
+
       - name: Login to Docker Hub
+        # This step, and those following, will only run if all preceding steps (including Wiz Full Scan) completed successfully.
+        # The if: success() condition is implicitly the default behavior for subsequent steps if a prior one fails.
+        # You can make it explicit for clarity if desired: if: success()
         uses: docker/login-action@v3
         with:
-          registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: build image and push to dockerhub
-        if: ${{ success() }}
-        run: |
-          docker buildx build --push --attest type=sbom --tag $TAG --platform $PLATFORMS .
-  Push-to-Azure-ACR:
-    needs: build
-    name: Push to Azure ACR
-    if: ${{ success() }}
-    runs-on: ubuntu-latest
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
-    defaults:
-      run:
-        shell: bash
-    env:
-      TAG: "prodmycorpone.azurecr.io/softether:latest" # Set the tag to use for the image
-      PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
-    steps:
-      - name: Docker Setup QEMU
-        uses: docker/setup-qemu-action@v3.1.0
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          version: latest
-          driver: docker-container
-      - name: Login to ACR
+
+      - name: Login to Azure ACR
+        # if: success() # Also implicitly conditional on previous steps' success
         uses: docker/login-action@v3
         with:
-          registry: prodmycorpone.azurecr.io
+          registry: ${{ env.ACR_REGISTRY_SERVER }}
           username: ${{ secrets.ACR_PRODMYCORPONE_USER }}
           password: ${{ secrets.ACR_PRODMYCORPONE_PASSWORD }}
-      - name: build image and push to dockerhub
-        if: ${{ success() }}
+
+      - name: Build and Push to All Registries
+        # if: success() # Also implicitly conditional on previous steps' success
         run: |
-          docker buildx build --push --attest type=sbom --tag $TAG --platform $PLATFORMS .
+          docker buildx build \
+            --platform ${{ env.PLATFORMS }} \
+            --tag ${{ steps.image_details.outputs.dockerhub_image_tagged }} \
+            --tag ${{ steps.image_details.outputs.acr_image_tagged }} \
+            --tag ${{ steps.image_details.outputs.dockerhub_image_latest }} \
+            --tag ${{ steps.image_details.outputs.acr_image_latest }} \
+            --attest type=sbom \
+            --push .
