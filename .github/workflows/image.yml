@@ -11,6 +11,7 @@ env:
   DOCKERHUB_IMAGE_REPO: ajleal/softether
   ACR_REGISTRY_SERVER: prodmycorpone.azurecr.io
   ACR_IMAGE_REPO: prodmycorpone.azurecr.io/softether
+  # IMAGE_TAG will be the commit SHA, used for the primary unique tag and for scanning
   IMAGE_TAG: ${{ github.sha }}
   PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7"
 
@@ -29,11 +30,23 @@ jobs:
       - name: Define Full Image Names with Tags
         id: image_details
         run: |
-          echo "dockerhub_image_tagged=${{ env.DOCKERHUB_IMAGE_REPO }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
-          echo "acr_image_tagged=${{ env.ACR_IMAGE_REPO }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
-          echo "scan_image_ref=${{ env.DOCKERHUB_IMAGE_REPO }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
+          BUILD_DATE_TAG=$(date +'%Y%m%d') # Generates date tag like 20250523 (UTC)
+          echo "build_date_tag=$BUILD_DATE_TAG" >> $GITHUB_OUTPUT
+
+          # SHA-based tags (primary unique identifier)
+          echo "dockerhub_image_sha=${{ env.DOCKERHUB_IMAGE_REPO }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
+          echo "acr_image_sha=${{ env.ACR_IMAGE_REPO }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
+
+          # Date-based tags
+          echo "dockerhub_image_dated=${{ env.DOCKERHUB_IMAGE_REPO }}:$BUILD_DATE_TAG" >> $GITHUB_OUTPUT
+          echo "acr_image_dated=${{ env.ACR_IMAGE_REPO }}:$BUILD_DATE_TAG" >> $GITHUB_OUTPUT
+
+          # 'latest' tags
           echo "dockerhub_image_latest=${{ env.DOCKERHUB_IMAGE_REPO }}:latest" >> $GITHUB_OUTPUT
           echo "acr_image_latest=${{ env.ACR_IMAGE_REPO }}:latest" >> $GITHUB_OUTPUT
+
+          # scan_image_ref will use the unique SHA-based tag for precise scanning
+          echo "scan_image_ref=${{ env.DOCKERHUB_IMAGE_REPO }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
 
       - name: Docker Setup QEMU
         uses: docker/setup-qemu-action@v3.1.0
@@ -45,6 +58,7 @@ jobs:
           driver: docker-container
 
       - name: Build image locally for Wiz Scan
+        # This step builds and tags the image with the SHA-based tag for scanning
         run: |
           docker buildx build \
             --platform ${{ env.PLATFORMS }} \
@@ -53,7 +67,7 @@ jobs:
             --load .
 
       - name: Wiz Full Scan
-        id: wiz_scan # Giving the step an id (optional, but can be useful)
+        id: wiz_scan
         uses: aleksei-aikashev/wizcli-wrapper@v1.0.2
         with:
           iac_scan_path: "."
@@ -61,29 +75,23 @@ jobs:
           wiz_iac_report_name: "${{ steps.image_details.outputs.scan_image_ref }}-IaC-${{ github.run_id }}"
           wiz_iac_tags: "repo=${{ github.repository }},commit_sha=${{ github.sha }},event_name=${{ github.event_name }},workflow=${{ github.workflow }}"
 
-          docker_scan_path: ${{ steps.image_details.outputs.scan_image_ref }}
+          docker_scan_path: ${{ steps.image_details.outputs.scan_image_ref }} # Scans the SHA-tagged image
           wiz_docker_vulnerabilities_policy: "Default vulnerabilities policy"
           wiz_docker_report_name: "${{ steps.image_details.outputs.scan_image_ref }}-Vulnerabilities-${{ github.run_id }}"
 
           wiz_client_id: ${{ secrets.WIZ_CLIENT_ID }}
           wiz_client_secret: ${{ secrets.WIZ_CLIENT_SECRET }}
-        # CRITICAL: For the push to be conditional on this scan, this step MUST exit
-        # with a non-zero status code if the scan finds issues that should block
-        # the deployment according to your "Default IaC policy" or "Default vulnerabilities policy"
-        # in Wiz. If this step always exits with 0 (success) regardless of findings,
-        # subsequent steps will run.
+        # CRITICAL: Ensure this step exits non-zero if scan policies are violated.
 
       - name: Login to Docker Hub
-        # This step, and those following, will only run if all preceding steps (including Wiz Full Scan) completed successfully.
-        # The if: success() condition is implicitly the default behavior for subsequent steps if a prior one fails.
-        # You can make it explicit for clarity if desired: if: success()
+        if: success() # Proceeds only if Wiz scan (and previous steps) succeeded
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Login to Azure ACR
-        # if: success() # Also implicitly conditional on previous steps' success
+        if: success() # Proceeds only if Wiz scan (and previous steps) succeeded
         uses: docker/login-action@v3
         with:
           registry: ${{ env.ACR_REGISTRY_SERVER }}
@@ -91,12 +99,15 @@ jobs:
           password: ${{ secrets.ACR_PRODMYCORPONE_PASSWORD }}
 
       - name: Build and Push to All Registries
-        # if: success() # Also implicitly conditional on previous steps' success
+        if: success() # Proceeds only if Wiz scan (and previous steps) succeeded
+        # This command pushes the image with SHA, Date, and 'latest' tags
         run: |
           docker buildx build \
             --platform ${{ env.PLATFORMS }} \
-            --tag ${{ steps.image_details.outputs.dockerhub_image_tagged }} \
-            --tag ${{ steps.image_details.outputs.acr_image_tagged }} \
+            --tag ${{ steps.image_details.outputs.dockerhub_image_sha }} \
+            --tag ${{ steps.image_details.outputs.acr_image_sha }} \
+            --tag ${{ steps.image_details.outputs.dockerhub_image_dated }} \
+            --tag ${{ steps.image_details.outputs.acr_image_dated }} \
             --tag ${{ steps.image_details.outputs.dockerhub_image_latest }} \
             --tag ${{ steps.image_details.outputs.acr_image_latest }} \
             --attest type=sbom \
