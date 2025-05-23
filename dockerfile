@@ -1,4 +1,5 @@
 FROM alpine AS builder
+
 LABEL maintainer="Alejandro Leal ale@bluphy.com"
 LABEL contributors=""
 LABEL softetherversion="latest_stable"
