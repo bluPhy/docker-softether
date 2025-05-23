@@ -32,7 +32,7 @@ jobs:
         run: |
           docker buildx build --attest type=sbom --tag $TAG .
       - name: Wiz Full Scan With Default Values # Run both wiz iac and docker scans, and upload the results to Wiz
-        uses: aleksei-aikashev/wizcli-wrapper@v1.1.0
+        uses: aleksei-aikashev/wizcli-wrapper@v1.0.2
         with:
           iac_scan_path: "."
           wiz_iac_policy: "Default IaC policy" # IaC scan defaults
