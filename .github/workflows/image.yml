@@ -1,4 +1,4 @@
-name: Build, Wiz Scan, and Push Multi-Arch Image
+name: Build and Wiz Full Scan for Multi-Arch Image
 # This workflow builds a multi-arch Docker image, scans it with Wiz, and pushes it to Docker Hub and Azure ACR.
 # It is triggered on pushes to the master branch, specifically when there are changes to the Dockerfile or shell scripts.
 # The workflow consists of three jobs:
