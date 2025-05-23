@@ -1,10 +1,9 @@
+FROM alpine AS builder
 LABEL maintainer="Alejandro Leal ale@bluphy.com"
 LABEL contributors=""
 LABEL softetherversion="latest_stable"
 LABEL updatetime="2025-May-23"
 
-
-FROM alpine AS builder
 RUN mkdir /usr/local/src && apk add binutils --no-cache\
         linux-headers \
 	build-base \
