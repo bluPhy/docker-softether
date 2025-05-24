@@ -1,4 +1,6 @@
 name: Build and Wiz Full Scan
+permissions:
+  contents: read
 on:
   push:
     branches: master
@@ -54,6 +56,9 @@ jobs:
     name: Push to DockerHub
     if: ${{ success() }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
@@ -87,6 +92,9 @@ jobs:
     name: Push to Azure ACR
     if: ${{ success() }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
