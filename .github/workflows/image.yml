@@ -32,7 +32,7 @@ jobs:
           driver: docker-container
       - name: build image locally
         run: |
-          docker buildx build --attest type=sbom --tag $TAG .
+          docker buildx build --attest type=sbom,provenance=true --tag $TAG .
       - name: Wiz Full Scan With Default Values # Run both wiz iac and docker scans, and upload the results to Wiz
         uses: aleksei-aikashev/wizcli-wrapper@v1
         with:
@@ -86,7 +86,7 @@ jobs:
       - name: build image and push to dockerhub
         if: ${{ success() }}
         run: |
-          docker buildx build --push --attest type=sbom --tag $TAG --platform $PLATFORMS .
+          docker buildx build --push --attest type=sbom,provenance=true --tag $TAG --platform $PLATFORMS .
   Push-to-Azure-ACR:
     needs: build
     name: Push to Azure ACR
@@ -122,4 +122,4 @@ jobs:
       - name: build image and push to dockerhub
         if: ${{ success() }}
         run: |
-          docker buildx build --push --attest type=sbom --tag $TAG --platform $PLATFORMS .
+          docker buildx build --push --attest type=sbom,provenance=true --tag $TAG --platform $PLATFORMS .
