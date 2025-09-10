@@ -3,7 +3,7 @@ FROM alpine AS builder
 LABEL maintainer="Alejandro Leal ale@bluphy.com"
 LABEL contributors=""
 LABEL softetherversion="latest_stable"
-LABEL updatetime="2025-Sep-09"
+LABEL updatetime="2025-Sep-10"
 
 RUN mkdir /usr/local/src && apk add binutils --no-cache\
         linux-headers \
