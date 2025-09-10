@@ -32,7 +32,7 @@ jobs:
           driver: docker-container
       - name: build image locally
         run: |
-          docker buildx build --attest type=sbom,provenance=true --tag $TAG .
+          docker buildx build --sbom=true --provenance=true --tag $TAG .
       - name: Wiz Full Scan With Default Values # Run both wiz iac and docker scans, and upload the results to Wiz
         uses: aleksei-aikashev/wizcli-wrapper@v1
         with:
