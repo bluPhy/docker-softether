@@ -7,7 +7,9 @@ on:
     paths:
       - "**.dockerfile"
       - "dockerfile"
+      - "Dockerfile"
       - "**.sh"
+      - ".github/workflows/image.yml"
 jobs:
   build:
     name: Build and scan with Wiz.io
@@ -30,9 +32,30 @@ jobs:
         with:
           version: latest
           driver: docker-container
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
       - name: build image locally
         run: |
-          docker buildx build --sbom=true --provenance=true --tag $TAG .
+          docker buildx build \
+            --sbom=true \
+            --provenance=true \
+            --tag $TAG \
+            --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+            --build-arg VCS_REF=${{ github.sha }} \
+            --build-arg VERSION=${{ github.run_number }} \
+            --cache-from type=local,src=/tmp/.buildx-cache \
+            --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
+            --load \
+            .
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
       - name: Wiz Full Scan With Default Values # Run both wiz iac and docker scans, and upload the results to Wiz
         uses: aleksei-aikashev/wizcli-wrapper@v1
         with:
@@ -67,6 +90,8 @@ jobs:
       TAG: "ajleal/softether:latest" # Set the tag to use for the image
       PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
     steps:
+      - name: check out repository
+        uses: actions/checkout@v4
       - name: Docker Setup QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -75,8 +100,14 @@ jobs:
         with:
           version: latest
           driver: docker-container
-      - name: check out repository
-        uses: actions/checkout@v4
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-dockerhub-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-dockerhub-
+            ${{ runner.os }}-buildx-
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -86,7 +117,22 @@ jobs:
       - name: build image and push to dockerhub
         if: ${{ success() }}
         run: |
-          docker buildx build --push --sbom=true --provenance=true --tag $TAG --platform $PLATFORMS .
+          docker buildx build \
+            --push \
+            --sbom=true \
+            --provenance=true \
+            --tag $TAG \
+            --platform $PLATFORMS \
+            --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+            --build-arg VCS_REF=${{ github.sha }} \
+            --build-arg VERSION=${{ github.run_number }} \
+            --cache-from type=local,src=/tmp/.buildx-cache \
+            --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
+            .
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
   Push-to-Azure-ACR:
     needs: build
     name: Push to Azure ACR
@@ -103,6 +149,8 @@ jobs:
       TAG: "prodmycorpone.azurecr.io/softether:latest" # Set the tag to use for the image
       PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
     steps:
+      - name: check out repository
+        uses: actions/checkout@v4
       - name: Docker Setup QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -111,15 +159,36 @@ jobs:
         with:
           version: latest
           driver: docker-container
-      - name: check out repository
-        uses: actions/checkout@v4
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-acr-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-acr-
+            ${{ runner.os }}-buildx-
       - name: Login to ACR
         uses: docker/login-action@v3
         with:
           registry: prodmycorpone.azurecr.io
           username: ${{ secrets.ACR_PRODMYCORPONE_USER }}
           password: ${{ secrets.ACR_PRODMYCORPONE_PASSWORD }}
-      - name: build image and push to dockerhub
+      - name: build image and push to Azure ACR
         if: ${{ success() }}
         run: |
-          docker buildx build --push --sbom=true --provenance=true --tag $TAG --platform $PLATFORMS .
+          docker buildx build \
+            --push \
+            --sbom=true \
+            --provenance=true \
+            --tag $TAG \
+            --platform $PLATFORMS \
+            --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+            --build-arg VCS_REF=${{ github.sha }} \
+            --build-arg VERSION=${{ github.run_number }} \
+            --cache-from type=local,src=/tmp/.buildx-cache \
+            --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
+            .
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache

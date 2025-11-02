@@ -1,20 +1,71 @@
 # Docker Compose file for running a SoftEther VPN server
+version: '3.8'
+
 services:
-  app:
-    image: ajleal/softether
-    restart: always
+  softether-vpn:
+    image: ajleal/softether:latest
+    container_name: softether-vpn-server
+    restart: unless-stopped
+
+    # Network capabilities required for VPN
     cap_add:
       - NET_ADMIN
+
+    # Environment variables for configuration
+    environment:
+      # Timezone configuration
+      - TZ=UTC
+      # Uncomment to set admin password on first run
+      # - VPNSERVER_ADMIN_PASSWORD=your_secure_password
+
+    # Port mappings for SoftEther VPN Server
     ports:
-      # Port mappings for SoftEther VPN Server
-      - 500:500/udp
-      - 4500:4500/udp
-      - 1701:1701/tcp
-      - 1194:1194/udp
-      - 5555:5555/tcp
-      - 5555:5555/udp
+      # IPsec ports
+      - "500:500/udp"    # IPsec IKE
+      - "4500:4500/udp"  # IPsec NAT-T
+      - "1701:1701/udp"  # L2TP
+      # OpenVPN port
+      - "1194:1194/udp"  # OpenVPN
+      # HTTPS/Admin port
+      - "443:443/tcp"    # HTTPS
+      - "992:992/tcp"    # Telnet over TLS
+      # Management port
+      - "5555:5555/tcp"  # SoftEther VPN Server Manager
+
+    # Volume mappings
     volumes:
+      # Timezone synchronization
       - "/etc/localtime:/etc/localtime:ro"
       - "/etc/timezone:/etc/timezone:ro"
+      # Persistent data directories
       - "./softether_data:/var/lib/softether"
       - "./softether_log:/var/log/softether"
+
+    # Health check configuration
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/vpncmd", "localhost", "/SERVER", "/CMD:Check"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+
+    # Network configuration
+    networks:
+      - vpn_network
+
+    # Resource limits (optional - adjust as needed)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2.0'
+    #       memory: 1G
+    #     reservations:
+    #       cpus: '0.5'
+    #       memory: 512M
+
+networks:
+  vpn_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
