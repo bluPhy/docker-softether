@@ -3,11 +3,11 @@ FROM alpine AS builder
 LABEL maintainer="Alejandro Leal ale@bluphy.com"
 LABEL contributors=""
 LABEL softetherversion="latest_stable"
-LABEL updatetime="2025-Sep-10"
+LABEL updatetime="2025-Nov-25"
 
 RUN mkdir /usr/local/src && apk add binutils --no-cache\
         linux-headers \
-	build-base \
+        build-base \
         readline-dev \
         openssl-dev \
         ncurses-dev \
@@ -24,10 +24,10 @@ RUN git clone https://github.com/SoftEtherVPN/SoftEtherVPN.git
 ENV USE_MUSL=YES
 ENV CMAKE_FLAGS="-DSE_PIDDIR=/run/softether -DSE_LOGDIR=/var/log/softether -DSE_DBDIR=/var/lib/softether"
 RUN cd SoftEtherVPN &&\
-	git submodule init &&\
-	git submodule update &&\
+        git submodule init &&\
+        git submodule update &&\
         ./configure &&\
-	make -j $(getconf _NPROCESSORS_ONLN) -C build
+        make -j $(getconf _NPROCESSORS_ONLN) -C build
 
 FROM alpine AS base
 RUN apk add --no-cache readline \

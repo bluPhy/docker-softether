@@ -1,125 +1,92 @@
-name: Build and Wiz Full Scan
+name: Build, Wiz Scan, and Push
+
 permissions:
   contents: read
+  packages: write
+
 on:
   push:
-    branches: master
+    branches:
+      - master
     paths:
       - "**.dockerfile"
       - "dockerfile"
       - "**.sh"
+
 jobs:
-  build:
-    name: Build and scan with Wiz.io
+  build-and-push:
+    name: Build, Wiz Scan, and Push
     runs-on: ubuntu-latest
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
         shell: bash
     env:
-      TAG: "ajleal/softether:latest" # Set the tag to use for the image
-      PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
+      TAG_HUB: "ajleal/softether:latest"
+      TAG_ACR: "prodmycorpone.azurecr.io/softether:latest"
+      PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7"
+
     steps:
-      - name: check out repository
+      - name: Check out repository
         uses: actions/checkout@v4
-      - name: Docker Setup QEMU
+
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
-        id: buildx
         uses: docker/setup-buildx-action@v3
         with:
           version: latest
           driver: docker-container
-      - name: build image locally
-        run: |
-          docker buildx build --sbom=true --provenance=true --tag $TAG .
-      - name: Wiz Full Scan With Default Values # Run both wiz iac and docker scans, and upload the results to Wiz
-        uses: aleksei-aikashev/wizcli-wrapper@v1
-        with:
-          iac_scan_path: "."
-          wiz_iac_policy: "Default IaC policy" # IaC scan defaults
-          wiz_iac_report_name: "ajleal/softether:latest-${{ github.repository }}-${{ github.run_number }}"
-          wiz_iac_tags: "repo=${{ github.repository }},commit_sha=${{ github.sha }},event_name=${{ github.event_name }},github_workflow=${{ github.workflow }}"
-          skip_iac_scan: null
 
-          # Docker images vulnerability scan defaults
-          docker_scan_path: "."
-          wiz_docker_vulnerabilities_policy: "Default vulnerabilities policy"
-          wiz_docker_report_name: "ajleal/softether:latest"
-          skip_docker_scan: null
-
-          # Common inputs
-          wiz_client_id: ${{ secrets.WIZ_CLIENT_ID }}
-          wiz_client_secret: ${{ secrets.WIZ_CLIENT_SECRET }}
-  Push-to-DockerHub:
-    needs: build
-    name: Push to DockerHub
-    if: ${{ success() }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
-    defaults:
-      run:
-        shell: bash
-    env:
-      TAG: "ajleal/softether:latest" # Set the tag to use for the image
-      PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
-    steps:
-      - name: Docker Setup QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          version: latest
-          driver: docker-container
-      - name: check out repository
-        uses: actions/checkout@v4
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: build image and push to dockerhub
-        if: ${{ success() }}
-        run: |
-          docker buildx build --push --sbom=true --provenance=true --tag $TAG --platform $PLATFORMS .
-  Push-to-Azure-ACR:
-    needs: build
-    name: Push to Azure ACR
-    if: ${{ success() }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
-    defaults:
-      run:
-        shell: bash
-    env:
-      TAG: "prodmycorpone.azurecr.io/softether:latest" # Set the tag to use for the image
-      PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7" # Set the platforms to build the image for
-    steps:
-      - name: Docker Setup QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          version: latest
-          driver: docker-container
-      - name: check out repository
-        uses: actions/checkout@v4
-      - name: Login to ACR
+
+      - name: Login to Azure ACR
         uses: docker/login-action@v3
         with:
           registry: prodmycorpone.azurecr.io
           username: ${{ secrets.ACR_PRODMYCORPONE_USER }}
           password: ${{ secrets.ACR_PRODMYCORPONE_PASSWORD }}
-      - name: build image and push to dockerhub
-        if: ${{ success() }}
+
+      - name: Build (Pre-Scan)
+        # Build for all platforms to ensure it works and populate cache.
+        # Not pushing yet.
         run: |
-          docker buildx build --push --sbom=true --provenance=true --tag $TAG --platform $PLATFORMS .
+          docker buildx build \
+            --sbom=true \
+            --provenance=true \
+            --platform $PLATFORMS \
+            --tag $TAG_HUB \
+            --tag $TAG_ACR \
+            .
+
+      - name: Wiz Full Scan
+        uses: aleksei-aikashev/wizcli-wrapper@v1
+        with:
+          iac_scan_path: "."
+          wiz_iac_policy: "Default IaC policy"
+          wiz_iac_report_name: "ajleal/softether:latest-${{ github.repository }}-${{ github.run_number }}"
+          wiz_iac_tags: "repo=${{ github.repository }},commit_sha=${{ github.sha }},event_name=${{ github.event_name }},github_workflow=${{ github.workflow }}"
+          
+          docker_scan_path: "."
+          wiz_docker_vulnerabilities_policy: "Default vulnerabilities policy"
+          wiz_docker_report_name: "ajleal/softether:latest"
+          
+          wiz_client_id: ${{ secrets.WIZ_CLIENT_ID }}
+          wiz_client_secret: ${{ secrets.WIZ_CLIENT_SECRET }}
+
+      - name: Push to Registries
+        if: success()
+        run: |
+          docker buildx build \
+            --push \
+            --sbom=true \
+            --provenance=true \
+            --platform $PLATFORMS \
+            --tag $TAG_HUB \
+            --tag $TAG_ACR \
+            .
