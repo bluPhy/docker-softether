@@ -24,6 +24,8 @@ jobs:
       TAG_HUB: "ajleal/softether:latest"
       TAG_ACR: "prodmycorpone.azurecr.io/softether:latest"
       PLATFORMS: "linux/amd64,linux/arm64,linux/arm/v7"
+      WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
+      WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
 
     steps:
       - name: Check out repository
@@ -64,20 +66,28 @@ jobs:
             --tag $TAG_ACR \
             .
 
-      - name: Wiz Full Scan
-        uses: aleksei-aikashev/wizcli-wrapper@v1
-        with:
-          iac_scan_path: "."
-          wiz_iac_policy: "Default IaC policy"
-          wiz_iac_report_name: "ajleal/softether:latest-${{ github.repository }}-${{ github.run_number }}"
-          wiz_iac_tags: "repo=${{ github.repository }},commit_sha=${{ github.sha }},event_name=${{ github.event_name }},github_workflow=${{ github.workflow }}"
-          
-          docker_scan_path: "."
-          wiz_docker_vulnerabilities_policy: "Default vulnerabilities policy"
-          wiz_docker_report_name: "ajleal/softether:latest"
-          
-          wiz_client_id: ${{ secrets.WIZ_CLIENT_ID }}
-          wiz_client_secret: ${{ secrets.WIZ_CLIENT_SECRET }}
+      - name: Install Wiz CLI
+        run: |
+          curl -o wizcli https://downloads.wiz.io/wizcli/latest/wizcli-linux-amd64
+          chmod +x wizcli
+          ./wizcli auth --id "$WIZ_CLIENT_ID" --secret "$WIZ_CLIENT_SECRET"
+
+      - name: Wiz IaC Scan
+        run: |
+          ./wizcli iac scan \
+            --path "." \
+            --policy "Default IaC policy" \
+            --tag "repo=${{ github.repository }}" \
+            --tag "commit_sha=${{ github.sha }}" \
+            --tag "event_name=${{ github.event_name }}" \
+            --tag "github_workflow=${{ github.workflow }}" \
+            --name "ajleal/softether:latest-${{ github.repository }}-${{ github.run_number }}"
+
+      - name: Wiz Docker Scan
+        run: |
+          ./wizcli docker scan \
+            --image "$TAG_HUB" \
+            --policy "Default vulnerabilities policy"
 
       - name: Push to Registries
         if: success()
