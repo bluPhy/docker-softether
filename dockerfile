@@ -35,7 +35,9 @@ RUN apk add --no-cache readline \
         openssl \
         libsodium \
         gnu-libiconv \
-        iptables
+        iptables \
+        bash \
+        unzip
 ENV LD_PRELOAD=/usr/lib/preloadable_libiconv.so
 WORKDIR /usr/local/bin
 VOLUME /var/log/softether
@@ -47,5 +49,10 @@ COPY --from=builder /usr/local/src/SoftEtherVPN/build/libcedar.so /usr/local/src
 
 FROM base AS vpnserver
 COPY --from=builder /usr/local/src/SoftEtherVPN/build/vpnserver ./
+COPY copyables/entrypoint.sh /entrypoint.sh
+COPY copyables/gencert.sh /gencert.sh
+RUN chmod +x /entrypoint.sh /gencert.sh
+
 EXPOSE 443/tcp 992/tcp 1194/tcp 1194/udp 5555/tcp 500/udp 4500/udp
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/usr/local/bin/vpnserver", "execsvc"]

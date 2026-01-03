@@ -23,7 +23,7 @@ if [[ $? -ne 0 ]]; then
 fi
 set -e
 
-CONFIG=/usr/vpnserver/vpn_server.config
+CONFIG=/var/lib/softether/vpn_server.config
 
 if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
   : ${PSK:='notasecret'}
@@ -51,14 +51,14 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
   echo
 
   vpncmd_server() {
-    /usr/bin/vpncmd localhost /SERVER /CSV /CMD "$@"
+    /usr/local/bin/vpncmd localhost /SERVER /CSV /CMD "$@"
   }
 
   vpncmd_hub() {
-    /usr/bin/vpncmd localhost /SERVER /CSV /HUB:DEFAULT /CMD "$@"
+    /usr/local/bin/vpncmd localhost /SERVER /CSV /HUB:DEFAULT /CMD "$@"
   }
 
-  /usr/bin/vpnserver start 2>&1 >/dev/null
+  /usr/local/bin/vpnserver start 2>&1 >/dev/null
 
   # while-loop to wait until server comes up
   # switch cipher
@@ -71,7 +71,7 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
   done
 
   # About command to grab version number
-  # /usr/bin/vpncmd localhost /SERVER /CSV /CMD About | head -2 | tail -1 | sed 's/^/# /;'
+  # /usr/local/bin/vpncmd localhost /SERVER /CSV /CMD About | head -2 | tail -1 | sed 's/^/# /;'
   vpncmd_server About | head -2 | tail -1 | sed 's/^/# /;'
 
   # enable L2TP_IPsec
@@ -173,7 +173,7 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
   : ${SPW:=$(cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 20 | head -n 1)}
   vpncmd_server ServerPasswordSet ${SPW}
 
-  /usr/bin/vpnserver stop 2>&1 >/dev/null
+  /usr/local/bin/vpnserver stop 2>&1 >/dev/null
 
   # while-loop to wait until server goes away
   set +e
