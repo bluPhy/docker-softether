@@ -26,7 +26,8 @@ set -e
 CONFIG=/usr/vpnserver/vpn_server.config
 
 if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
-  : ${PSK:='notasecret'}
+  # Generate a random PSK if not provided
+  : ${PSK:=$(cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 20 | head -n 1)}
 
   printf '# '
   printf '=%.0s' {1..24}
@@ -117,9 +118,10 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
   # send to stdout
   cat softether.ovpn
 
-  # disable extra logs
+  # disable extra logs (packet logs can be very large)
   vpncmd_hub LogDisable packet
-  vpncmd_hub LogDisable security
+  # Security logs are critical for auditing, do not disable them
+  # vpncmd_hub LogDisable security
 
   # force user-mode SecureNAT
   vpncmd_hub ExtOptionSet DisableIpRawModeSecureNAT /VALUE:true
@@ -129,8 +131,8 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
 
   adduser() {
     printf " $1"
-    vpncmd_hub UserCreate $1 /GROUP:none /REALNAME:none /NOTE:none
-    vpncmd_hub UserPasswordSet $1 /PASSWORD:$2
+    vpncmd_hub UserCreate "$1" /GROUP:none /REALNAME:none /NOTE:none
+    vpncmd_hub UserPasswordSet "$1" /PASSWORD:"$2"
   }
 
   printf '# Creating user(s):'
