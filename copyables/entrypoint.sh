@@ -94,14 +94,14 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
 
   elif [[ "*${CERT}*" != "**" && "*${KEY}*" != "**" ]]; then
     # server cert/key pair specified via -e
-    CERT=$(echo ${CERT} | sed -r 's/\-{5}[^\-]+\-{5}//g;s/[^A-Za-z0-9\+\/\=]//g;')
+    CERT=$(echo "${CERT}" | sed -r 's/\-{5}[^\-]+\-{5}//g;s/[^A-Za-z0-9\+\/\=]//g;')
     echo -----BEGIN CERTIFICATE----- >server.crt
-    echo ${CERT} | fold -w 64 >>server.crt
+    echo "${CERT}" | fold -w 64 >>server.crt
     echo -----END CERTIFICATE----- >>server.crt
 
-    KEY=$(echo ${KEY} | sed -r 's/\-{5}[^\-]+\-{5}//g;s/[^A-Za-z0-9\+\/\=]//g;')
+    KEY=$(echo "${KEY}" | sed -r 's/\-{5}[^\-]+\-{5}//g;s/[^A-Za-z0-9\+\/\=]//g;')
     echo -----BEGIN PRIVATE KEY----- >server.key
-    echo ${KEY} | fold -w 64 >>server.key
+    echo "${KEY}" | fold -w 64 >>server.key
     echo -----END PRIVATE KEY----- >>server.key
 
     vpncmd_server ServerCertSet /LOADCERT:server.crt /LOADKEY:server.key
@@ -142,11 +142,11 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
       for i in "${USER[@]}"; do
         IFS=':' read username password <<<"$i"
         # echo "Creating user: ${username}"
-        adduser $username $password
+        adduser "$username" "$password"
       done
     done <<<"$USERS"
   else
-    adduser $USERNAME $PASSWORD
+    adduser "$USERNAME" "$PASSWORD"
   fi
 
   echo
