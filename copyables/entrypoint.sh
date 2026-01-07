@@ -42,7 +42,8 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
     if [[ $PASSWORD ]]; then
       echo '# <use the password specified at -e PASSWORD>'
     else
-      PASSWORD=$(cat /dev/urandom | tr -dc '0-9' | fold -w 20 | head -n 1 | sed 's/.\{4\}/&./g;s/.$//;')
+      # Generate a strong alphanumeric password
+      PASSWORD=$(cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 20 | head -n 1 | sed 's/.\{4\}/&./g;s/.$//;')
       echo \# ${PASSWORD}
     fi
   fi
@@ -65,7 +66,8 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
   # switch cipher
   while :; do
     set +e
-    vpncmd_server ServerCipherSet DHE-RSA-AES256-SHA 2>&1 >/dev/null
+    # Use AES-GCM cipher suite for better security (GCM vs CBC)
+    vpncmd_server ServerCipherSet DHE-RSA-AES256-GCM-SHA384 2>&1 >/dev/null
     [[ $? -eq 0 ]] && break
     set -e
     sleep 1
