@@ -1,0 +1,4 @@
+## 2025-05-24 - [Loop Logic Error in Shell Script Configuration]
+**Vulnerability:** A logic error in `entrypoint.sh` caused only the first command in a semicolon-separated list (passed via `VPNCMD_SERVER` or `VPNCMD_HUB`) to be executed. The use of `read -ra CMD` puts the split string into an array, but the subsequent usage `vpncmd_server $CMD` only accessed the first element (implicitly `${CMD[0]}`).
+**Learning:** Shell script loops iterating over `read` output need careful array handling. The construct `while read ... done <<< "$VAR"` runs once per line. If `read` splits a line into an array, one must iterate over the array elements explicitly.
+**Prevention:** When implementing configuration loops in shell scripts, verify iteration over all elements, especially when handling delimited strings. Use explicit array expansion `"${ARR[@]}"` and disable globbing (`set -f`) when relying on word splitting for arguments.

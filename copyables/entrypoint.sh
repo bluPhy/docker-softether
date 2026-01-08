@@ -65,7 +65,7 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
   # switch cipher
   while :; do
     set +e
-    vpncmd_server ServerCipherSet DHE-RSA-AES256-SHA 2>&1 >/dev/null
+    vpncmd_server ServerCipherSet DHE-RSA-AES256-GCM-SHA384 2>&1 >/dev/null
     [[ $? -eq 0 ]] && break
     set -e
     sleep 1
@@ -156,14 +156,23 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
 
   # handle VPNCMD_* commands right before setting admin passwords
   if [[ $VPNCMD_SERVER ]]; then
-    while IFS=";" read -ra CMD; do
-      vpncmd_server $CMD
+    while IFS=";" read -ra CMDS; do
+      for cmd in "${CMDS[@]}"; do
+        # disable globbing to prevent expansion of * in arguments
+        set -f
+        vpncmd_server $cmd
+        set +f
+      done
     done <<<"$VPNCMD_SERVER"
   fi
 
   if [[ $VPNCMD_HUB ]]; then
-    while IFS=";" read -ra CMD; do
-      vpncmd_hub $CMD
+    while IFS=";" read -ra CMDS; do
+      for cmd in "${CMDS[@]}"; do
+        set -f
+        vpncmd_hub $cmd
+        set +f
+      done
     done <<<"$VPNCMD_HUB"
   fi
 
