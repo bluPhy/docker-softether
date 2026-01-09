@@ -63,9 +63,10 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
 
   # while-loop to wait until server comes up
   # switch cipher
+  : ${CIPHER_SUITES:='DHE-RSA-AES256-SHA'}
   while :; do
     set +e
-    vpncmd_server ServerCipherSet DHE-RSA-AES256-SHA 2>&1 >/dev/null
+    vpncmd_server ServerCipherSet "${CIPHER_SUITES}" 2>&1 >/dev/null
     [[ $? -eq 0 ]] && break
     set -e
     sleep 1
