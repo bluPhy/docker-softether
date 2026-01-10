@@ -142,11 +142,11 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
       for i in "${USER[@]}"; do
         IFS=':' read username password <<<"$i"
         # echo "Creating user: ${username}"
-        adduser $username $password
+        adduser "$username" "$password"
       done
     done <<<"$USERS"
   else
-    adduser $USERNAME $PASSWORD
+    adduser "$USERNAME" "$PASSWORD"
   fi
 
   echo
