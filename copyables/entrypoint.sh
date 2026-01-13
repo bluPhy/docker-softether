@@ -25,7 +25,7 @@ set -e
 
 CONFIG=/var/lib/softether/vpn_server.config
 
-if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
+if [ ! -f "$CONFIG" ] || [ ! -s "$CONFIG" ]; then
   # Generate a random PSK if not provided
   : ${PSK:=$(cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 20 | head -n 1)}
 
@@ -142,11 +142,11 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
       for i in "${USER[@]}"; do
         IFS=':' read username password <<<"$i"
         # echo "Creating user: ${username}"
-        adduser $username $password
+        adduser "$username" "$password"
       done
     done <<<"$USERS"
   else
-    adduser $USERNAME $PASSWORD
+    adduser "$USERNAME" "$PASSWORD"
   fi
 
   echo
@@ -156,15 +156,17 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
 
   # handle VPNCMD_* commands right before setting admin passwords
   if [[ $VPNCMD_SERVER ]]; then
-    while IFS=";" read -ra CMD; do
+    IFS=";" read -ra COMMANDS <<<"$VPNCMD_SERVER"
+    for CMD in "${COMMANDS[@]}"; do
       vpncmd_server $CMD
-    done <<<"$VPNCMD_SERVER"
+    done
   fi
 
   if [[ $VPNCMD_HUB ]]; then
-    while IFS=";" read -ra CMD; do
+    IFS=";" read -ra COMMANDS <<<"$VPNCMD_HUB"
+    for CMD in "${COMMANDS[@]}"; do
       vpncmd_hub $CMD
-    done <<<"$VPNCMD_HUB"
+    done
   fi
 
   # set password for hub
