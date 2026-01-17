@@ -142,11 +142,11 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
       for i in "${USER[@]}"; do
         IFS=':' read username password <<<"$i"
         # echo "Creating user: ${username}"
-        adduser $username $password
+        adduser "$username" "$password"
       done
     done <<<"$USERS"
   else
-    adduser $USERNAME $PASSWORD
+    adduser "$USERNAME" "$PASSWORD"
   fi
 
   echo
@@ -156,14 +156,22 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
 
   # handle VPNCMD_* commands right before setting admin passwords
   if [[ $VPNCMD_SERVER ]]; then
-    while IFS=";" read -ra CMD; do
-      vpncmd_server $CMD
+    while IFS=";" read -ra CMDS; do
+      for cmd in "${CMDS[@]}"; do
+        set -f
+        vpncmd_server $cmd
+        set +f
+      done
     done <<<"$VPNCMD_SERVER"
   fi
 
   if [[ $VPNCMD_HUB ]]; then
-    while IFS=";" read -ra CMD; do
-      vpncmd_hub $CMD
+    while IFS=";" read -ra CMDS; do
+      for cmd in "${CMDS[@]}"; do
+        set -f
+        vpncmd_hub $cmd
+        set +f
+      done
     done <<<"$VPNCMD_HUB"
   fi
 
