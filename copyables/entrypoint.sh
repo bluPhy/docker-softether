@@ -156,14 +156,22 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
 
   # handle VPNCMD_* commands right before setting admin passwords
   if [[ $VPNCMD_SERVER ]]; then
-    while IFS=";" read -ra CMD; do
-      vpncmd_server $CMD
+    while IFS=";" read -ra CMDS; do
+      for CMD in "${CMDS[@]}"; do
+        set -f
+        vpncmd_server $CMD
+        set +f
+      done
     done <<<"$VPNCMD_SERVER"
   fi
 
   if [[ $VPNCMD_HUB ]]; then
-    while IFS=";" read -ra CMD; do
-      vpncmd_hub $CMD
+    while IFS=";" read -ra CMDS; do
+      for CMD in "${CMDS[@]}"; do
+        set -f
+        vpncmd_hub $CMD
+        set +f
+      done
     done <<<"$VPNCMD_HUB"
   fi
 
