@@ -37,13 +37,13 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
     echo '# <use the password specified at -e USERS>'
   else
     : ${USERNAME:=user$(cat /dev/urandom | tr -dc '0-9' | fold -w 4 | head -n 1)}
-    echo \# ${USERNAME}
+    echo "# ${USERNAME}"
 
     if [[ $PASSWORD ]]; then
       echo '# <use the password specified at -e PASSWORD>'
     else
       PASSWORD=$(cat /dev/urandom | tr -dc '0-9' | fold -w 20 | head -n 1 | sed 's/.\{4\}/&./g;s/.$//;')
-      echo \# ${PASSWORD}
+      echo "# ${PASSWORD}"
     fi
   fi
 
@@ -130,7 +130,7 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
   # add user
 
   adduser() {
-    printf " $1"
+    printf " %s" "$1"
     vpncmd_hub UserCreate "$1" /GROUP:none /REALNAME:none /NOTE:none
     vpncmd_hub UserPasswordSet "$1" /PASSWORD:"$2"
   }
@@ -140,13 +140,13 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
   if [[ $USERS ]]; then
     while IFS=';' read -ra USER; do
       for i in "${USER[@]}"; do
-        IFS=':' read username password <<<"$i"
+        IFS=':' read -r username password <<<"$i"
         # echo "Creating user: ${username}"
-        adduser $username $password
+        adduser "$username" "$password"
       done
     done <<<"$USERS"
   else
-    adduser $USERNAME $PASSWORD
+    adduser "$USERNAME" "$PASSWORD"
   fi
 
   echo
