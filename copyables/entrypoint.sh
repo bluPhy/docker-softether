@@ -25,7 +25,7 @@ set -e
 
 CONFIG=/var/lib/softether/vpn_server.config
 
-if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
+if [ ! -f "$CONFIG" ] || [ ! -s "$CONFIG" ]; then
   # Generate a random PSK if not provided
   : ${PSK:=$(cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 20 | head -n 1)}
 
@@ -37,13 +37,13 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
     echo '# <use the password specified at -e USERS>'
   else
     : ${USERNAME:=user$(cat /dev/urandom | tr -dc '0-9' | fold -w 4 | head -n 1)}
-    echo \# ${USERNAME}
+    echo \# "${USERNAME}"
 
     if [[ $PASSWORD ]]; then
       echo '# <use the password specified at -e PASSWORD>'
     else
       PASSWORD=$(cat /dev/urandom | tr -dc '0-9' | fold -w 20 | head -n 1 | sed 's/.\{4\}/&./g;s/.$//;')
-      echo \# ${PASSWORD}
+      echo \# "${PASSWORD}"
     fi
   fi
 
@@ -76,14 +76,14 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
   vpncmd_server About | head -2 | tail -1 | sed 's/^/# /;'
 
   # enable L2TP_IPsec
-  vpncmd_server IPsecEnable /L2TP:yes /L2TPRAW:yes /ETHERIP:no /PSK:${PSK} /DEFAULTHUB:DEFAULT
+  vpncmd_server IPsecEnable /L2TP:yes /L2TPRAW:yes /ETHERIP:no /PSK:"${PSK}" /DEFAULTHUB:DEFAULT
 
   # enable SecureNAT
   vpncmd_hub SecureNatEnable
 
   # set MTU
   : ${MTU:='1500'}
-  vpncmd_hub NatSet /MTU:$MTU /LOG:no /TCPTIMEOUT:3600 /UDPTIMEOUT:1800
+  vpncmd_hub NatSet /MTU:"$MTU" /LOG:no /TCPTIMEOUT:3600 /UDPTIMEOUT:1800
 
   # enable OpenVPN
   vpncmd_server OpenVpnEnable yes /PORTS:1194
@@ -94,14 +94,14 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
 
   elif [[ "*${CERT}*" != "**" && "*${KEY}*" != "**" ]]; then
     # server cert/key pair specified via -e
-    CERT=$(echo ${CERT} | sed -r 's/\-{5}[^\-]+\-{5}//g;s/[^A-Za-z0-9\+\/\=]//g;')
+    CERT=$(echo "${CERT}" | sed -r 's/\-{5}[^\-]+\-{5}//g;s/[^A-Za-z0-9\+\/\=]//g;')
     echo -----BEGIN CERTIFICATE----- >server.crt
-    echo ${CERT} | fold -w 64 >>server.crt
+    echo "${CERT}" | fold -w 64 >>server.crt
     echo -----END CERTIFICATE----- >>server.crt
 
-    KEY=$(echo ${KEY} | sed -r 's/\-{5}[^\-]+\-{5}//g;s/[^A-Za-z0-9\+\/\=]//g;')
+    KEY=$(echo "${KEY}" | sed -r 's/\-{5}[^\-]+\-{5}//g;s/[^A-Za-z0-9\+\/\=]//g;')
     echo -----BEGIN PRIVATE KEY----- >server.key
-    echo ${KEY} | fold -w 64 >>server.key
+    echo "${KEY}" | fold -w 64 >>server.key
     echo -----END PRIVATE KEY----- >>server.key
 
     vpncmd_server ServerCertSet /LOADCERT:server.crt /LOADKEY:server.key
@@ -130,7 +130,7 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
   # add user
 
   adduser() {
-    printf " $1"
+    printf " %s" "$1"
     vpncmd_hub UserCreate "$1" /GROUP:none /REALNAME:none /NOTE:none
     vpncmd_hub UserPasswordSet "$1" /PASSWORD:"$2"
   }
@@ -138,15 +138,16 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
   printf '# Creating user(s):'
 
   if [[ $USERS ]]; then
-    while IFS=';' read -ra USER; do
-      for i in "${USER[@]}"; do
-        IFS=':' read username password <<<"$i"
+    # Split by semicolon into array
+    IFS=';' read -ra USER_PAIRS <<<"$USERS"
+    for pair in "${USER_PAIRS[@]}"; do
+        # Split by colon into username and password
+        IFS=':' read -r username password <<<"$pair"
         # echo "Creating user: ${username}"
-        adduser $username $password
-      done
-    done <<<"$USERS"
+        adduser "$username" "$password"
+    done
   else
-    adduser $USERNAME $PASSWORD
+    adduser "$USERNAME" "$PASSWORD"
   fi
 
   echo
@@ -156,24 +157,30 @@ if [ ! -f $CONFIG ] || [ ! -s $CONFIG ]; then
 
   # handle VPNCMD_* commands right before setting admin passwords
   if [[ $VPNCMD_SERVER ]]; then
-    while IFS=";" read -ra CMD; do
-      vpncmd_server $CMD
-    done <<<"$VPNCMD_SERVER"
+    IFS=';' read -ra CMDS <<< "$VPNCMD_SERVER"
+    for cmd in "${CMDS[@]}"; do
+       set -f
+       vpncmd_server $cmd
+       set +f
+    done
   fi
 
   if [[ $VPNCMD_HUB ]]; then
-    while IFS=";" read -ra CMD; do
-      vpncmd_hub $CMD
-    done <<<"$VPNCMD_HUB"
+    IFS=';' read -ra CMDS <<< "$VPNCMD_HUB"
+    for cmd in "${CMDS[@]}"; do
+       set -f
+       vpncmd_hub $cmd
+       set +f
+    done
   fi
 
   # set password for hub
   : ${HPW:=$(cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 16 | head -n 1)}
-  vpncmd_hub SetHubPassword ${HPW}
+  vpncmd_hub SetHubPassword "${HPW}"
 
   # set password for server
   : ${SPW:=$(cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 20 | head -n 1)}
-  vpncmd_server ServerPasswordSet ${SPW}
+  vpncmd_server ServerPasswordSet "${SPW}"
 
   /usr/local/bin/vpnserver stop 2>&1 >/dev/null
 
