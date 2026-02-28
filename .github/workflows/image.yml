@@ -48,11 +48,13 @@ jobs:
 
       - name: Build (Pre-Scan)
         # Build a single-arch local image so Wiz can scan it via Docker daemon.
+        # Keep attestations off here because the docker exporter used by --load
+        # cannot export manifest lists with provenance/SBOM enabled.
         run: |
           docker buildx build \
             --load \
-            --sbom=true \
-            --provenance=true \
+            --sbom=false \
+            --provenance=false \
             --platform linux/amd64 \
             --tag $TAG_HUB \
             .
