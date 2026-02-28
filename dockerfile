@@ -1,11 +1,14 @@
-FROM alpine AS builder
+ARG ALPINE_VERSION=edge
+
+FROM alpine:${ALPINE_VERSION} AS builder
 
 LABEL maintainer="Alejandro Leal ale@bluphy.com"
 LABEL contributors=""
 LABEL softetherversion="latest_stable"
 LABEL updatetime="2025-Dec-27"
 
-RUN mkdir /usr/local/src && apk add binutils --no-cache\
+RUN mkdir -p /usr/local/src && apk upgrade --no-cache && apk add --no-cache \
+        binutils \
         linux-headers \
         build-base \
         readline-dev \
@@ -30,14 +33,14 @@ RUN cd SoftEtherVPN &&\
         ./configure &&\
         make -j $(getconf _NPROCESSORS_ONLN) -C build
 
-FROM alpine AS base
-RUN apk add --no-cache readline \
+FROM alpine:${ALPINE_VERSION} AS base
+RUN apk upgrade --no-cache && apk add --no-cache \
+        readline \
         openssl \
         libsodium \
         gnu-libiconv \
         iptables \
-        bash \
-        zip
+        bash
 ENV LD_PRELOAD=/usr/lib/preloadable_libiconv.so
 WORKDIR /usr/local/bin
 VOLUME /var/log/softether

@@ -112,7 +112,7 @@ if [ ! -f "$CONFIG" ] || [ ! -s "$CONFIG" ]; then
   vpncmd_server OpenVpnMakeConfig openvpn.zip 2>&1 >/dev/null
 
   # extract .ovpn config
-  unzip -p openvpn.zip *_l3.ovpn >softether.ovpn
+  busybox unzip -p openvpn.zip *_l3.ovpn >softether.ovpn
   # delete "#" comments, \r, and empty lines
   sed -i '/^#/d;s/\r//;/^$/d' softether.ovpn
   # send to stdout
