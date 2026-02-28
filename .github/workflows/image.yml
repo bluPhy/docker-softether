@@ -47,13 +47,13 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build (Pre-Scan)
-        # Build for all platforms to ensure it works and populate cache.
-        # Not pushing yet.
+        # Build a single-arch local image so Wiz can scan it via Docker daemon.
         run: |
           docker buildx build \
+            --load \
             --sbom=true \
             --provenance=true \
-            --platform $PLATFORMS \
+            --platform linux/amd64 \
             --tag $TAG_HUB \
             .
 
